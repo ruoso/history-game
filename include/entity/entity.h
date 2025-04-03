@@ -2,6 +2,7 @@
 #define HISTORY_GAME_ENTITY_H
 
 #include <string>
+#include <cpioo/managed_entity.hpp>
 #include "world/position.h"
 
 namespace history_game {
@@ -17,6 +18,10 @@ struct Entity {
   // Constructor for initialization
   Entity(std::string entity_id, Position entity_position) 
     : id(std::move(entity_id)), position(entity_position) {}
+  
+  // Define storage type
+  using storage = cpioo::managed_entity::storage<Entity, 10, uint32_t>;
+  using ref_type = storage::ref_type;
 };
 
 } // namespace history_game

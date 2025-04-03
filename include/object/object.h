@@ -64,8 +64,8 @@ using ObjectCategory = std::variant<
  * Represents a world object
  */
 struct WorldObject {
-  // Basic entity properties
-  const Entity entity;
+  // Reference to the base entity
+  const Entity::ref_type entity;
   
   // Object category
   const ObjectCategory category;
@@ -76,10 +76,10 @@ struct WorldObject {
   // Constructor
   template<ObjectCategoryConcept T>
   WorldObject(
-    Entity entity_data,
+    const Entity::ref_type& entity_ref,
     T category_type,
     const NPCIdentity::ref_type& creator
-  ) : entity(std::move(entity_data)),
+  ) : entity(entity_ref),
       category(category_type),
       created_by(creator) {}
       

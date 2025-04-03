@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <cpioo/managed_entity.hpp>
-#include "npc/npc_identity.h"
+#include "entity/entity.h"
 #include "npc/drive.h"
 
 namespace history_game {
@@ -27,8 +27,8 @@ struct AffectiveTrace {
  * This is asymmetric - each NPC has their own perception of the relationship
  */
 struct Relationship {
-  // The target NPC of this relationship
-  const NPCIdentity::ref_type target;
+  // The target entity of this relationship
+  const Entity::ref_type target;
   
   // Familiarity level (exposure)
   const float familiarity;
@@ -44,12 +44,12 @@ struct Relationship {
   
   // Constructor
   Relationship(
-    const NPCIdentity::ref_type& target_npc,
+    const Entity::ref_type& target_entity,
     float familiarity_level,
     std::vector<AffectiveTrace> traces,
     uint64_t interaction_time,
     uint32_t episode_count
-  ) : target(target_npc),
+  ) : target(target_entity),
       familiarity(familiarity_level),
       affective_traces(std::move(traces)),
       last_interaction(interaction_time),

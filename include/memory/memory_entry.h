@@ -3,39 +3,72 @@
 
 #include <string>
 #include <cstdint>
+#include <optional>
 #include <cpioo/managed_entity.hpp>
 #include "entity/entity.h"
 #include "npc/npc_identity.h"
+#include "action/action_type.h"
+#include "object/object.h"
 
 namespace history_game {
 
 /**
  * Represents a single observed action or event
- * These are the basic building blocks of NPC memory
+ * These are the basic building blocks of NPC memory in the speechless world
  */
 struct MemoryEntry {
   // When the memory was formed
   const uint64_t timestamp;
   
-  // Who performed the action (if an NPC)
+  // Who performed the action
   const NPCIdentity::ref_type actor;
   
-  // Where the action occurred
-  const Position location;
+  // The action that was observed
+  const ActionType action;
   
-  // Description of what was observed
-  const std::string description;
+  // Target of the action, if any (optional)
+  const std::optional<Entity::ref_type> target_entity;
   
-  // Constructor
+  // Object involved in the action, if any (optional)
+  const std::optional<WorldObject::ref_type> target_object;
+  
+  // Constructor for action with entity target
+  template<ActionTypeConcept T>
   MemoryEntry(
     uint64_t time, 
     const NPCIdentity::ref_type& actor_ref,
-    Position memory_location,
-    std::string memory_description
+    T action_type,
+    const Entity::ref_type& entity_target
   ) : timestamp(time),
       actor(actor_ref),
-      location(memory_location),
-      description(std::move(memory_description)) {}
+      action(action_type),
+      target_entity(entity_target),
+      target_object(std::nullopt) {}
+  
+  // Constructor for action with object target
+  template<ActionTypeConcept T>
+  MemoryEntry(
+    uint64_t time, 
+    const NPCIdentity::ref_type& actor_ref,
+    T action_type,
+    const WorldObject::ref_type& object_target
+  ) : timestamp(time),
+      actor(actor_ref),
+      action(action_type),
+      target_entity(std::nullopt),
+      target_object(object_target) {}
+  
+  // Constructor for action without a target
+  template<ActionTypeConcept T>
+  MemoryEntry(
+    uint64_t time, 
+    const NPCIdentity::ref_type& actor_ref,
+    T action_type
+  ) : timestamp(time),
+      actor(actor_ref),
+      action(action_type),
+      target_entity(std::nullopt),
+      target_object(std::nullopt) {}
       
   // Define storage type
   using storage = cpioo::managed_entity::storage<MemoryEntry, 10, uint32_t>;
