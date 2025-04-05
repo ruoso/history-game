@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <cpioo/managed_entity.hpp>
+#include <spdlog/spdlog.h>
 #include "npc/npc.h"
 #include "memory/memory_entry.h"
 #include "memory/memory_episode.h"
@@ -14,6 +15,20 @@
 namespace history_game {
 
 namespace episode_formation_system {
+
+  /**
+   * Get action name for logging
+   */
+  inline std::string get_action_name(const ActionType& action) {
+    return std::visit([](const auto& a) -> std::string { return a.name; }, action);
+  }
+  
+  /**
+   * Get drive name for logging
+   */
+  inline std::string get_drive_name(const DriveType& drive) {
+    return std::visit([](const auto& d) -> std::string { return d.name; }, drive);
+  }
 
   /**
    * Identify sequences of related actions in the perception buffer
@@ -159,6 +174,17 @@ namespace episode_formation_system {
     const std::string& sequence_id,
     uint32_t repetition_count = 1
   ) {
+    // Log memory episode creation
+    std::string npc_id = sequence.front()->actor->entity->id;
+    std::string impact_summary;
+    
+    for (const auto& impact : impacts) {
+      impact_summary += get_drive_name(impact.type) + ":" + 
+                        std::to_string(impact.intensity) + " ";
+    }
+    
+    spdlog::info("NPC {} forms memory episode (id: {}, impacts: {})", 
+                 npc_id, sequence_id, impact_summary);
     // Calculate start and end times
     uint64_t start_time = sequence.front()->timestamp;
     uint64_t end_time = sequence.back()->timestamp;

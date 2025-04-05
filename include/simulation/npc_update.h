@@ -2,6 +2,7 @@
 #define HISTORY_GAME_NPC_UPDATE_H
 
 #include <vector>
+#include <spdlog/spdlog.h>
 #include "world/world.h"
 #include "npc/npc.h"
 #include "drives/drive_dynamics.h"
@@ -56,7 +57,11 @@ namespace npc_update_system {
     const NPCUpdateParams& params,
     uint64_t current_time
   ) {
+    const std::string& npc_id = npc->identity->entity->id;
+    spdlog::debug("Updating NPC {} at tick {}", npc_id, current_time);
+    
     // 1. Update drives based on natural increase
+    spdlog::trace("NPC {}: Updating drives", npc_id);
     auto npc_with_drives = drive_dynamics_system::updateDrives(
       npc,
       params.drive_params,
@@ -64,6 +69,7 @@ namespace npc_update_system {
     );
     
     // 2. Process perception to form episodic memories
+    spdlog::trace("NPC {}: Forming episodic memories", npc_id);
     auto npc_with_memories = episode_formation_system::formEpisodicMemories(
       npc_with_drives,
       current_time,
@@ -73,6 +79,7 @@ namespace npc_update_system {
     );
     
     // 3. Select the next action based on drives and context
+    spdlog::trace("NPC {}: Selecting next action", npc_id);
     ActionSelectionCriteria criteria(
       npc_with_memories->drives,
       params.familiarity_preference,
@@ -86,6 +93,7 @@ namespace npc_update_system {
       criteria
     );
     
+    spdlog::debug("NPC {} update completed for tick {}", npc_id, current_time);
     return npc_with_action;
   }
   
@@ -98,6 +106,9 @@ namespace npc_update_system {
   ) {
     // Get the current time from the simulation clock
     uint64_t current_time = world->clock->current_tick;
+    
+    spdlog::info("Updating all {} NPCs at tick {}", 
+                world->npcs.size(), current_time);
     
     // Update each NPC
     std::vector<NPC::ref_type> updated_npcs;
@@ -115,6 +126,8 @@ namespace npc_update_system {
       std::move(updated_npcs),
       world->objects
     );
+    
+    spdlog::info("Completed updating all NPCs at tick {}", current_time);
     
     return World::storage::make_entity(std::move(updated_world));
   }

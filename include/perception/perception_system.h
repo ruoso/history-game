@@ -5,6 +5,7 @@
 #include <tuple>
 #include <cmath>
 #include <variant>
+#include <spdlog/spdlog.h>
 #include "world/world.h"
 #include "npc/npc.h"
 #include "object/object.h"
@@ -88,6 +89,54 @@ namespace perception_system {
   }
   
   /**
+   * Get entity type name for NPC
+   */
+  inline std::string get_entity_type_name(const NPC::ref_type& npc) {
+    return "NPC";
+  }
+  
+  /**
+   * Get entity type name for WorldObject
+   */
+  inline std::string get_entity_type_name(const WorldObject::ref_type& obj) {
+    return std::visit([](const auto& category) -> std::string { 
+      return category.name; 
+    }, obj->category);
+  }
+  
+  /**
+   * Get entity type name using std::visit
+   */
+  inline std::string get_entity_type_name(const PerceivableEntity& entity) {
+    return std::visit([](const auto& e) -> std::string {
+      return get_entity_type_name(e);
+    }, entity);
+  }
+  
+  /**
+   * Get entity ID for logging
+   */
+  inline std::string get_entity_id(const NPC::ref_type& npc) {
+    return npc->identity->entity->id;
+  }
+  
+  /**
+   * Get entity ID for WorldObject
+   */
+  inline std::string get_entity_id(const WorldObject::ref_type& obj) {
+    return obj->entity->id;
+  }
+  
+  /**
+   * Get entity ID using std::visit
+   */
+  inline std::string get_entity_id(const PerceivableEntity& entity) {
+    return std::visit([](const auto& e) -> std::string {
+      return get_entity_id(e);
+    }, entity);
+  }
+
+  /**
    * Find all entity pairs within perception range of each other
    * 
    * @param world The current world state
@@ -115,6 +164,12 @@ namespace perception_system {
         float distance = calculateDistance(npc_pos, other_pos);
         
         if (distance <= max_distance) {
+          // Log the perception
+          const std::string observer_id = get_entity_id(npc);
+          const std::string observed_id = get_entity_id(other_npc);
+          spdlog::debug("NPC {} perceives NPC {} at distance {:.2f}", 
+                        observer_id, observed_id, distance);
+                      
           result.emplace_back(npc, PerceivableEntity{other_npc}, distance);
         }
       }
@@ -125,6 +180,13 @@ namespace perception_system {
         float distance = calculateDistance(npc_pos, obj_pos);
         
         if (distance <= max_distance) {
+          // Log the perception
+          const std::string observer_id = get_entity_id(npc);
+          const std::string object_id = get_entity_id(object);
+          const std::string object_type = get_entity_type_name(object);
+          spdlog::debug("NPC {} perceives {} {} at distance {:.2f}", 
+                        observer_id, object_type, object_id, distance);
+                      
           result.emplace_back(npc, PerceivableEntity{object}, distance);
         }
       }

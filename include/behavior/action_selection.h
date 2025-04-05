@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <random>
 #include <cpioo/managed_entity.hpp>
+#include <spdlog/spdlog.h>
 #include "npc/npc.h"
 #include "npc/drive.h"
 #include "action/action_type.h"
@@ -103,6 +104,11 @@ struct ActionSelectionCriteria {
 };
 
 namespace action_selection_system {
+
+  // Helper function to get action type name for logging
+  inline std::string get_action_name(const ActionType& action) {
+    return std::visit([](const auto& a) -> std::string { return a.name; }, action);
+  }
 
   /**
    * Calculate a score for how well an action addresses the NPC's drives
@@ -429,6 +435,21 @@ namespace action_selection_system {
     const NPCIdentity::ref_type& identity,
     const ActionOption& selected_action
   ) {
+    // Log the action being taken
+    const std::string action_name = get_action_name(selected_action.action);
+    const std::string npc_id = identity->entity->id;
+    
+    if (selected_action.target_entity) {
+      const std::string target_id = selected_action.target_entity.value()->id;
+      spdlog::info("NPC {} performs {} targeting entity {}", npc_id, action_name, target_id);
+    } 
+    else if (selected_action.target_object) {
+      const std::string object_id = selected_action.target_object.value()->entity->id;
+      spdlog::info("NPC {} performs {} targeting object {}", npc_id, action_name, object_id);
+    }
+    else {
+      spdlog::info("NPC {} performs {}", npc_id, action_name);
+    }
     // Create a new identity with the updated action
     if (selected_action.target_entity) {
       // Action targeting an entity

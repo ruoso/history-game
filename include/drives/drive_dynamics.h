@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cmath>
+#include <spdlog/spdlog.h>
 #include "npc/npc.h"
 #include "npc/drive.h"
 
@@ -32,6 +33,13 @@ struct DriveParameters {
 };
 
 namespace drive_dynamics_system {
+
+  /**
+   * Get drive name for logging
+   */
+  inline std::string get_drive_name(const DriveType& drive) {
+    return std::visit([](const auto& d) -> std::string { return d.name; }, drive);
+  }
 
   /**
    * Get the growth modifier for a specific drive type
@@ -80,6 +88,14 @@ namespace drive_dynamics_system {
     // Calculate the new intensity, clamped to 0-100
     float new_intensity = std::min(100.0f, drive.intensity + increase);
     
+    // Log significant drive changes (threshold of 1.0)
+    if (std::abs(new_intensity - drive.intensity) >= 1.0f) {
+      std::string drive_name = get_drive_name(drive.type);
+      spdlog::debug("Drive {} changed from {:.2f} to {:.2f} (change: {:.2f})", 
+                   drive_name, drive.intensity, new_intensity, 
+                   new_intensity - drive.intensity);
+    }
+    
     // Return updated drive
     return Drive(drive.type, new_intensity);
   }
@@ -95,6 +111,10 @@ namespace drive_dynamics_system {
     // Update each drive
     std::vector<Drive> updated_drives;
     updated_drives.reserve(npc->drives.size());
+    
+    // Log the update
+    const std::string npc_id = npc->identity->entity->id;
+    spdlog::trace("Updating drives for NPC {} over {} ticks", npc_id, ticks_elapsed);
     
     for (const auto& drive : npc->drives) {
       updated_drives.push_back(

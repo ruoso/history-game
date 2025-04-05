@@ -2,6 +2,7 @@
 #define HISTORY_GAME_SIMULATION_RUNNER_H
 
 #include <functional>
+#include <spdlog/spdlog.h>
 #include "world/world.h"
 #include "simulation/npc_update.h"
 #include "memory/memory_system.h"
@@ -22,8 +23,11 @@ namespace simulation_runner_system {
     
     // Determine if we should advance to a new generation
     uint32_t new_generation = clock->current_generation;
+    bool new_gen = false;
+    
     if (new_tick % clock->ticks_per_generation == 0) {
       new_generation++;
+      new_gen = true;
     }
     
     // Create a new clock
@@ -32,6 +36,14 @@ namespace simulation_runner_system {
       new_generation,
       clock->ticks_per_generation
     );
+    
+    // Log the time advancement
+    if (new_gen) {
+      spdlog::info("Simulation advanced to tick {} (new generation {})", 
+                  new_tick, new_generation);
+    } else {
+      spdlog::debug("Simulation advanced to tick {}", new_tick);
+    }
     
     return SimulationClock::storage::make_entity(std::move(updated_clock));
   }
@@ -44,10 +56,14 @@ namespace simulation_runner_system {
     const NPCUpdateParams& params,
     float perception_range = 10.0f
   ) {
+    spdlog::info("Processing simulation tick {}", world->clock->current_tick);
+    
     // 1. Update all NPCs (including action selection)
+    spdlog::debug("Updating NPCs (count: {})", world->npcs.size());
     auto world_with_actions = npc_update_system::updateAllNPCs(world, params);
     
     // 2. Process perceptions based on the new actions
+    spdlog::debug("Processing perceptions (range: {:.2f})", perception_range);
     auto world_with_perceptions = memory_system::processPerceptions(
       world_with_actions,
       perception_range
@@ -62,6 +78,8 @@ namespace simulation_runner_system {
       world_with_perceptions->npcs,
       world_with_perceptions->objects
     );
+    
+    spdlog::debug("Completed processing tick {}", world->clock->current_tick);
     
     return World::storage::make_entity(std::move(updated_world));
   }
@@ -83,6 +101,11 @@ namespace simulation_runner_system {
     float perception_range = 10.0f,
     const std::function<void(const World::ref_type&, uint64_t)>& callback = nullptr
   ) {
+    spdlog::info("Starting simulation for {} ticks (initial tick: {})", 
+                ticks, world->clock->current_tick);
+    spdlog::info("World contains {} NPCs and {} objects", 
+                world->npcs.size(), world->objects.size());
+                
     World::ref_type current_world = world;
     
     for (uint64_t i = 0; i < ticks; ++i) {
@@ -93,7 +116,17 @@ namespace simulation_runner_system {
       if (callback) {
         callback(current_world, i + 1);
       }
+      
+      // Log progress periodically for long simulations
+      if (ticks > 10 && (i + 1) % (ticks / 10) == 0) {
+        spdlog::info("Simulation progress: {:.0f}% ({}/{} ticks)", 
+                    (i + 1) * 100.0 / ticks, i + 1, ticks);
+      }
     }
+    
+    spdlog::info("Simulation complete - final tick: {}, generation: {}", 
+                current_world->clock->current_tick,
+                current_world->clock->current_generation);
     
     return current_world;
   }

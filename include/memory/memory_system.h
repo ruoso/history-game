@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include <unordered_map>
+#include <spdlog/spdlog.h>
 #include "world/world.h"
 #include "npc/npc.h"
 #include "memory/memory_entry.h"
@@ -171,11 +172,16 @@ namespace memory_system {
     // Get the current time from the simulation clock
     uint64_t current_time = world->clock->current_tick;
     
+    spdlog::debug("Processing perceptions at tick {} (range: {:.2f})", 
+                 current_time, perception_range);
+    
     // Calculate all perceptible entities in the world
     auto perceptions = perception_system::calculatePerceptibleEntities(
       world, 
       perception_range
     );
+    
+    spdlog::debug("Found {} perception events", perceptions.size());
     
     // Group perceptions by perceiver ID
     std::unordered_map<std::string, std::vector<MemoryEntry::ref_type>> npc_memories;
@@ -188,23 +194,31 @@ namespace memory_system {
     
     // Create updated NPCs with new memories
     std::vector<NPC::ref_type> updated_npcs;
+    int npcs_with_perceptions = 0;
     
     for (const auto& npc : world->npcs) {
       const auto& npc_id = perception_system::getId(npc);
       
       // If this NPC perceived anything, update its perception buffer
       if (npc_memories.count(npc_id) > 0) {
+        spdlog::trace("NPC {} received {} new perceptions", 
+                     npc_id, npc_memories[npc_id].size());
+                     
         auto updated_npc = updateNPCPerceptions(
           npc, 
           npc_memories[npc_id],
           max_buffer_size
         );
         updated_npcs.push_back(updated_npc);
+        npcs_with_perceptions++;
       } else {
         // No new perceptions, keep the original NPC
         updated_npcs.push_back(npc);
       }
     }
+    
+    spdlog::debug("Updated perception buffers for {}/{} NPCs", 
+                 npcs_with_perceptions, world->npcs.size());
     
     // Create a new world with updated NPCs
     World updated_world(
