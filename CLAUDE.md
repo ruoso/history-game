@@ -37,3 +37,6 @@ A simulation game focusing on emergent culture, behavior, and history in a speec
 - Comment classes and public methods using Doxygen style
 - Document simulation components with examples
 - Follow simulation pillars: speechless world, emergent memory, player as participant
+
+## Build System Notes
+- The cpioo project already does a fetchcontent of googletest, if you add it explicitly cmake will fail

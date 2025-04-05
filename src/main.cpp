@@ -4,8 +4,10 @@
 #include <random>
 #include <map>
 #include <set>
+#include <filesystem>
 #include <cpioo/managed_entity.hpp>
 #include <spdlog/spdlog.h>
+#include <chrono>
 
 #include "entity/entity.h"
 #include "world/world.h"
@@ -14,6 +16,7 @@
 #include "npc/drive.h"
 #include "object/object.h"
 #include "utility/log_init.h"
+#include "utility/serialization.h"
 #include "simulation/simulation_runner.h"
 #include "memory/perception_buffer.h"
 
@@ -106,6 +109,17 @@ int main() {
     // Initialize logging
     log_init::initialize("debug", "simulation.log");
     
+    // Create an output directory for logs and serialization if it doesn't exist
+    std::filesystem::create_directories("output");
+    
+    // Initialize serialization logger
+    serialization::SimulationLogger sim_logger;
+    bool logger_initialized = sim_logger.initialize("output/simulation_events.json");
+    if (!logger_initialized) {
+        spdlog::error("Failed to initialize simulation event logger");
+        return 1;
+    }
+    
     // Create a simulation clock
     SimulationClock clock(0, 1, 100);  // Start at tick 0, generation 1, 100 ticks per generation
     auto clock_ref = SimulationClock::storage::make_entity(std::move(clock));
@@ -145,6 +159,16 @@ int main() {
     World world(clock_ref, npcs, objects);
     auto world_ref = World::storage::make_entity(std::move(world));
     
+    // Ready to start simulation
+    spdlog::info("Starting simulation with {} NPCs and {} objects", 
+                npcs.size(), objects.size());
+    
+    // Log simulation start event
+    uint64_t current_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    sim_logger.logEvent(serialization::createSimulationStartEvent(
+        current_time, npcs.size(), objects.size()));
+    
     // Create simulation parameters
     NPCUpdateParams params(
         DriveParameters(0.2f, 0.5f),  // Drive dynamics
@@ -156,14 +180,28 @@ int main() {
         2      // Min sequence length
     );
     
-    // Run the simulation for 200 ticks (2 generations) as a test
-    // Change back to 1000 for full simulation
+    // Run the simulation for 200 ticks (2 generations)
+    // Shorter run for development to avoid long build times
     World::ref_type final_world = simulation_runner_system::runSimulation(
         world_ref, 
-        200,
+        200,  // 200 ticks for development
         params, 
-        100.0f  // Increased perception range for larger world
+        100.0f, // Increased perception range for larger world
+        &sim_logger // Pass the serialization logger
     );
+    
+    // Log simulation end event
+    current_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    sim_logger.logEvent(serialization::createSimulationEndEvent(
+        current_time, 
+        final_world->clock->current_tick,
+        final_world->clock->current_generation,
+        final_world->npcs.size(), 
+        final_world->objects.size()));
+    
+    // Close the serialization logger
+    sim_logger.shutdown();
     
     // Update our output reference without assignment
     // Use final_world for outputs below

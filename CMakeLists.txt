@@ -26,20 +26,29 @@ FetchContent_Declare(
     GIT_TAG main
 )
 
+# Fetch nlohmann/json for serialization
+FetchContent_Declare(
+    json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.2
+)
+
 # Make dependencies available
-FetchContent_MakeAvailable(inside_out_objects spdlog)
+FetchContent_MakeAvailable(inside_out_objects spdlog json)
 
 # Enable testing (googletest is already fetched by inside_out_objects)
 enable_testing()
 include(GoogleTest)
 
 # Create library target
-add_library(history_game_lib INTERFACE)
-target_include_directories(history_game_lib INTERFACE 
+add_library(history_game_lib
+    src/utility/serialization.cpp
+)
+target_include_directories(history_game_lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${inside_out_objects_SOURCE_DIR}/include
 )
-target_link_libraries(history_game_lib INTERFACE spdlog::spdlog cpioo)
+target_link_libraries(history_game_lib PUBLIC spdlog::spdlog cpioo nlohmann_json::nlohmann_json)
 
 # Main executable
 add_executable(history_game src/main.cpp)
@@ -60,8 +69,17 @@ add_executable(memory_test tests/memory_test.cpp)
 target_link_libraries(memory_test history_game_lib gtest gtest_main)
 gtest_discover_tests(memory_test)
 
+# Test serialization system
+add_executable(serialization_test tests/serialization_test.cpp)
+target_link_libraries(serialization_test history_game_lib gtest gtest_main)
+gtest_discover_tests(serialization_test)
+
 # Test inside-out objects integration
 add_executable(inside_out_test src/test_inside_out.cpp)
 target_link_libraries(inside_out_test history_game_lib gtest gtest_main)
 gtest_discover_tests(inside_out_test)
+
+# Visualizer test data generator
+add_executable(generate_test_data visualizer/generate_test_data.cpp)
+target_link_libraries(generate_test_data history_game_lib nlohmann_json::nlohmann_json)
 

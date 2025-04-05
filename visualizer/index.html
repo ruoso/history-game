@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History Game Simulation Visualizer</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>History Game Simulation Visualizer</h1>
+            <div class="controls">
+                <div class="file-controls">
+                    <input type="file" id="logFile" accept=".json">
+                    <button id="loadButton">Load Simulation</button>
+                </div>
+                <div class="playback-controls">
+                    <button id="playPauseButton" disabled>Play</button>
+                    <button id="stepBackButton" disabled>◀</button>
+                    <button id="stepForwardButton" disabled>▶</button>
+                    <div class="speed-control">
+                        <label for="playbackSpeed">Speed:</label>
+                        <input type="range" id="playbackSpeed" min="0.1" max="10" step="0.1" value="1" disabled>
+                        <span id="speedDisplay">1x</span>
+                    </div>
+                </div>
+                <div class="timeline-control">
+                    <input type="range" id="timelineSlider" min="0" max="100" value="0" disabled>
+                    <div class="timeline-info">
+                        <span>Tick: <span id="currentTick">-</span></span>
+                        <span>Generation: <span id="currentGeneration">-</span></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <main>
+            <div class="visualization-container">
+                <canvas id="worldCanvas"></canvas>
+                <div class="legend">
+                    <div class="legend-item"><span class="legend-color npc"></span> NPC</div>
+                    <div class="legend-item"><span class="legend-color food"></span> Food</div>
+                    <div class="legend-item"><span class="legend-color shelter"></span> Shelter</div>
+                    <div class="legend-item"><span class="legend-color perception"></span> Perception</div>
+                    <div class="legend-item"><span class="legend-color action"></span> Action</div>
+                </div>
+            </div>
+            
+            <div class="details-panel">
+                <div class="panel-section">
+                    <h3>Simulation Stats</h3>
+                    <div id="simulation-stats">
+                        <div>NPCs: <span id="npcCount">-</span></div>
+                        <div>Objects: <span id="objectCount">-</span></div>
+                        <div>Total Ticks: <span id="totalTicks">-</span></div>
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <h3>Selected Entity</h3>
+                    <div id="entity-details">
+                        <p>Click on an entity to see details</p>
+                    </div>
+                </div>
+                
+                <div class="panel-section">
+                    <h3>Event Log</h3>
+                    <div id="event-log">
+                        <p>Simulation events will appear here</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/visualizer.js"></script>
+</body>
+</html>

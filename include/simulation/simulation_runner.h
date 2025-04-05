@@ -3,12 +3,17 @@
 
 #include <functional>
 #include <spdlog/spdlog.h>
+#include <chrono>
 #include "world/world.h"
 #include "simulation/npc_update.h"
 #include "memory/memory_system.h"
 #include "world/simulation_clock.h"
+#include "utility/serialization.h"
 
 namespace history_game {
+
+// Use serialization's JSON type definition
+using json = serialization::json;
 
 namespace simulation_runner_system {
 
@@ -54,9 +59,22 @@ namespace simulation_runner_system {
   inline World::ref_type processTick(
     const World::ref_type& world,
     const NPCUpdateParams& params,
-    float perception_range = 10.0f
+    float perception_range = 10.0f,
+    serialization::SimulationLogger* logger = nullptr
   ) {
     spdlog::info("Processing simulation tick {}", world->clock->current_tick);
+    
+    // Log tick start event if logger is provided
+    if (logger && logger->isInitialized()) {
+      uint64_t current_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+      
+      logger->logEvent(serialization::createTickStartEvent(
+        current_time, 
+        world->clock->current_tick, 
+        world->clock->current_generation
+      ));
+    }
     
     // 1. Update all NPCs (including action selection)
     spdlog::debug("Updating NPCs (count: {})", world->npcs.size());
@@ -79,9 +97,83 @@ namespace simulation_runner_system {
       world_with_perceptions->objects
     );
     
+    auto result = World::storage::make_entity(std::move(updated_world));
+    
+    // Log tick end event and entity positions if logger is provided
+    if (logger && logger->isInitialized()) {
+      uint64_t current_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+      
+      // Log tick end event
+      logger->logEvent(serialization::createTickEndEvent(
+        current_time, 
+        world->clock->current_tick, 
+        world->clock->current_generation,
+        result->npcs.size(),
+        result->objects.size()
+      ));
+      
+      // Log entity updates - sample a few NPCs and objects to avoid too much data
+      int npc_count = std::min(10, static_cast<int>(result->npcs.size()));
+      int obj_count = std::min(10, static_cast<int>(result->objects.size()));
+      
+      // Log NPC positions and states
+      for (int i = 0; i < npc_count; i++) {
+        const auto& npc = result->npcs[i];
+        
+        // Create position JSON
+        json position;
+        position["x"] = npc->identity->entity->position.x;
+        position["y"] = npc->identity->entity->position.y;
+        
+        // Create drives JSON
+        json drives = json::array();
+        for (const auto& drive : npc->drives) {
+          json drive_json;
+          drive_json["type"] = drive_dynamics_system::get_drive_name(drive.type);
+          drive_json["value"] = drive.intensity;
+          drives.push_back(drive_json);
+        }
+        
+        // Get current action if any
+        std::optional<std::string> action;
+        if (npc->identity->current_action) {
+          action = action_selection_system::get_action_name(npc->identity->current_action.value());
+        }
+        
+        // Log entity update event
+        logger->logEvent(serialization::createEntityUpdateEvent(
+          current_time, 
+          npc->identity->entity->id, 
+          "NPC", 
+          position, 
+          drives, 
+          action
+        ));
+      }
+      
+      // Log object positions
+      for (int i = 0; i < obj_count; i++) {
+        const auto& object = result->objects[i];
+        
+        // Create position JSON
+        json position;
+        position["x"] = object->entity->position.x;
+        position["y"] = object->entity->position.y;
+        
+        // Log entity update event
+        logger->logEvent(serialization::createEntityUpdateEvent(
+          current_time, 
+          object->entity->id, 
+          "Object", 
+          position
+        ));
+      }
+    }
+    
     spdlog::debug("Completed processing tick {}", world->clock->current_tick);
     
-    return World::storage::make_entity(std::move(updated_world));
+    return result;
   }
   
   /**
@@ -101,10 +193,11 @@ namespace simulation_runner_system {
     float perception_range,
     uint64_t tick_number,
     uint64_t total_ticks,
-    const std::function<void(const World::ref_type&, uint64_t)>& callback
+    const std::function<void(const World::ref_type&, uint64_t)>& callback,
+    serialization::SimulationLogger* logger = nullptr
   ) {
     // Process one tick
-    World::ref_type next_world = processTick(world, params, perception_range);
+    World::ref_type next_world = processTick(world, params, perception_range, logger);
     
     // Call the callback if provided
     if (callback) {
@@ -128,7 +221,8 @@ namespace simulation_runner_system {
     uint64_t current_tick,
     const NPCUpdateParams& params,
     float perception_range,
-    const std::function<void(const World::ref_type&, uint64_t)>& callback
+    const std::function<void(const World::ref_type&, uint64_t)>& callback,
+    serialization::SimulationLogger* logger = nullptr
   ) {
     if (remaining_ticks == 0) {
       return world;
@@ -136,11 +230,11 @@ namespace simulation_runner_system {
     
     // Process one tick
     World::ref_type next_world = runTick(world, params, perception_range, 
-                                          current_tick, total_ticks, callback);
+                                        current_tick, total_ticks, callback, logger);
     
     // Process remaining ticks recursively
     return runSimulationRecursive(next_world, remaining_ticks - 1, total_ticks, 
-                                  current_tick + 1, params, perception_range, callback);
+                                current_tick + 1, params, perception_range, callback, logger);
   }
 
   inline World::ref_type runSimulation(
@@ -148,6 +242,7 @@ namespace simulation_runner_system {
     uint64_t ticks,
     const NPCUpdateParams& params,
     float perception_range = 10.0f,
+    serialization::SimulationLogger* logger = nullptr,
     const std::function<void(const World::ref_type&, uint64_t)>& callback = nullptr
   ) {
     spdlog::info("Starting simulation for {} ticks (initial tick: {})", 
@@ -157,7 +252,7 @@ namespace simulation_runner_system {
     
     // Use recursion to avoid reassigning references
     World::ref_type final_world = runSimulationRecursive(world, ticks, ticks, 1, 
-                                                          params, perception_range, callback);
+                                                        params, perception_range, callback, logger);
     
     spdlog::info("Simulation complete - final tick: {}, generation: {}", 
                 final_world->clock->current_tick,
