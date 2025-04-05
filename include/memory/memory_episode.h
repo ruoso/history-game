@@ -11,19 +11,6 @@
 namespace history_game {
 
 /**
- * Represents the emotional impact of an action sequence
- */
-struct DriveImpact {
-  const DriveType type;
-  const float delta;
-  
-  // Constructor
-  template<DriveTypeConcept T>
-  DriveImpact(T drive_type, float impact_value)
-    : type(drive_type), delta(impact_value) {}
-};
-
-/**
  * Represents the impact of an action sequence on an NPC's emotional drives
  */
 struct MemoryEpisode {
@@ -35,7 +22,7 @@ struct MemoryEpisode {
   const ActionSequence::ref_type action_sequence;
   
   // Impact on each drive
-  const std::vector<DriveImpact> drive_impacts;
+  const std::vector<Drive> drive_impacts;
   
   // How many times this has been repeated
   const uint32_t repetition_count;
@@ -45,7 +32,7 @@ struct MemoryEpisode {
     uint64_t start,
     uint64_t end,
     const ActionSequence::ref_type& sequence,
-    std::vector<DriveImpact> impacts,
+    std::vector<Drive> impacts,
     uint32_t repetitions = 1
   ) : start_time(start),
       end_time(end),

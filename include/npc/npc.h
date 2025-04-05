@@ -11,6 +11,7 @@
 #include "memory/memory_episode.h"
 #include "memory/witnessed_sequence.h"
 #include "relationship/relationship.h"
+#include "relationship/relationship_target.h"
 
 namespace history_game {
 
