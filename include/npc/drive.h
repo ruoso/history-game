@@ -67,6 +67,10 @@ struct Drive {
   template<DriveTypeConcept T>
   Drive(T drive_type, float drive_intensity) 
     : type(drive_type), intensity(drive_intensity) {}
+    
+  // Constructor taking DriveType directly
+  Drive(const DriveType& drive_type, float drive_intensity)
+    : type(drive_type), intensity(drive_intensity) {}
 };
 
 } // namespace history_game

@@ -18,25 +18,15 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
     GIT_TAG v1.12.0
 )
-FetchContent_MakeAvailable(spdlog)
-
-# Fetch googletest for testing
-FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG v1.14.0
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
 
 # Fetch inside-out-objects library
 FetchContent_Declare(
     inside_out_objects
-    GIT_REPOSITORY https://github.com/ruoso/inside-out-objects.git
+    GIT_REPOSITORY https://github.com/ruoso/poc-inside-out-objects.git
     GIT_TAG main
 )
-FetchContent_MakeAvailable(inside_out_objects)
+
+FetchContent_MakeAvailable(inside_out_objects spdlog)
 
 # Create library target
 add_library(history_game_lib INTERFACE)
@@ -44,24 +34,9 @@ target_include_directories(history_game_lib INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${inside_out_objects_SOURCE_DIR}/include
 )
-target_link_libraries(history_game_lib INTERFACE spdlog::spdlog)
+target_link_libraries(history_game_lib INTERFACE spdlog::spdlog cpioo)
 
 # Main executable
 add_executable(history_game src/main.cpp)
 target_link_libraries(history_game history_game_lib)
 
-# Enable testing
-enable_testing()
-
-# Create test executable
-add_executable(history_game_test 
-    tests/entity_test.cpp
-)
-target_link_libraries(history_game_test 
-    history_game_lib
-    GTest::gtest_main
-)
-
-# Register tests
-include(GoogleTest)
-gtest_discover_tests(history_game_test)

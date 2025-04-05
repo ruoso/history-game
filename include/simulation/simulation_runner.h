@@ -94,6 +94,55 @@ namespace simulation_runner_system {
    * @param callback Optional callback to call after each tick
    * @return The final world state after all ticks
    */
+  // Helper function to run a single tick
+  inline World::ref_type runTick(
+    const World::ref_type& world,
+    const NPCUpdateParams& params,
+    float perception_range,
+    uint64_t tick_number,
+    uint64_t total_ticks,
+    const std::function<void(const World::ref_type&, uint64_t)>& callback
+  ) {
+    // Process one tick
+    World::ref_type next_world = processTick(world, params, perception_range);
+    
+    // Call the callback if provided
+    if (callback) {
+      callback(next_world, tick_number);
+    }
+    
+    // Log progress periodically for long simulations
+    if (total_ticks > 10 && tick_number % (total_ticks / 10) == 0) {
+      spdlog::info("Simulation progress: {:.0f}% ({}/{} ticks)", 
+                  tick_number * 100.0 / total_ticks, tick_number, total_ticks);
+    }
+    
+    return next_world;
+  }
+
+  // Recursive implementation to avoid reassigning references
+  inline World::ref_type runSimulationRecursive(
+    const World::ref_type& world,
+    uint64_t remaining_ticks,
+    uint64_t total_ticks,
+    uint64_t current_tick,
+    const NPCUpdateParams& params,
+    float perception_range,
+    const std::function<void(const World::ref_type&, uint64_t)>& callback
+  ) {
+    if (remaining_ticks == 0) {
+      return world;
+    }
+    
+    // Process one tick
+    World::ref_type next_world = runTick(world, params, perception_range, 
+                                          current_tick, total_ticks, callback);
+    
+    // Process remaining ticks recursively
+    return runSimulationRecursive(next_world, remaining_ticks - 1, total_ticks, 
+                                  current_tick + 1, params, perception_range, callback);
+  }
+
   inline World::ref_type runSimulation(
     const World::ref_type& world,
     uint64_t ticks,
@@ -105,30 +154,16 @@ namespace simulation_runner_system {
                 ticks, world->clock->current_tick);
     spdlog::info("World contains {} NPCs and {} objects", 
                 world->npcs.size(), world->objects.size());
-                
-    World::ref_type current_world = world;
     
-    for (uint64_t i = 0; i < ticks; ++i) {
-      // Process one tick
-      current_world = processTick(current_world, params, perception_range);
-      
-      // Call the callback if provided
-      if (callback) {
-        callback(current_world, i + 1);
-      }
-      
-      // Log progress periodically for long simulations
-      if (ticks > 10 && (i + 1) % (ticks / 10) == 0) {
-        spdlog::info("Simulation progress: {:.0f}% ({}/{} ticks)", 
-                    (i + 1) * 100.0 / ticks, i + 1, ticks);
-      }
-    }
+    // Use recursion to avoid reassigning references
+    World::ref_type final_world = runSimulationRecursive(world, ticks, ticks, 1, 
+                                                          params, perception_range, callback);
     
     spdlog::info("Simulation complete - final tick: {}, generation: {}", 
-                current_world->clock->current_tick,
-                current_world->clock->current_generation);
+                final_world->clock->current_tick,
+                final_world->clock->current_generation);
     
-    return current_world;
+    return final_world;
   }
 
 } // namespace simulation_runner_system

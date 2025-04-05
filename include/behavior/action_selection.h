@@ -344,28 +344,35 @@ namespace action_selection_system {
       
       // Create action option with expected impacts from episode
       if (target_entity) {
-        options.emplace_back(
-          action,
-          target_entity.value(),
-          episode->drive_impacts,
-          true  // From memory
-        );
+        std::visit([&](const auto& specific_action) {
+          options.emplace_back(
+            specific_action,
+            target_entity.value(),
+            episode->drive_impacts,
+            true  // From memory
+          );
+        }, action);
       }
       else if (target_object) {
-        options.emplace_back(
-          action,
-          target_object.value(),
-          episode->drive_impacts,
-          true  // From memory
-        );
+        std::visit([&](const auto& specific_action) {
+          options.emplace_back(
+            specific_action,
+            target_object.value(),
+            episode->drive_impacts,
+            true  // From memory
+          );
+        }, action);
       }
       else {
         // Untargeted action
-        options.emplace_back(
-          action,
-          episode->drive_impacts,
-          true  // From memory
-        );
+        // Determine action type and use appropriate constructor
+        std::visit([&](const auto& specific_action) {
+          options.emplace_back(
+            specific_action,
+            episode->drive_impacts,
+            true  // From memory
+          );
+        }, action);
       }
     }
     
@@ -495,12 +502,18 @@ namespace action_selection_system {
     auto memory_options = generateMemoryBasedActions(npc, world);
     
     // Combine all options
-    std::vector<ActionOption> all_options = primitive_options;
-    all_options.insert(
-      all_options.end(),
-      memory_options.begin(),
-      memory_options.end()
-    );
+    std::vector<ActionOption> all_options;
+    all_options.reserve(primitive_options.size() + memory_options.size());
+    
+    // Add primitive options
+    for (const auto& option : primitive_options) {
+      all_options.push_back(option);
+    }
+    
+    // Add memory options
+    for (const auto& option : memory_options) {
+      all_options.push_back(option);
+    }
     
     // Select the best action
     auto selected_action = selectAction(all_options, criteria);
@@ -538,28 +551,41 @@ namespace action_selection_system {
     const ActionOption& action,
     float action_effectiveness = 1.0f
   ) {
-    // Start with the current drives
-    std::vector<Drive> updated_drives = npc->drives;
+    // Create a new vector for updated drives
+    std::vector<Drive> updated_drives;
+    updated_drives.reserve(npc->drives.size());
     
-    // Apply each impact from the action
-    for (const auto& impact : action.expected_impacts) {
-      // Find the corresponding drive in the NPC's drives
-      auto it = std::find_if(updated_drives.begin(), updated_drives.end(),
-        [&impact](const Drive& drive) {
-          return drive_impact_system::areSameDriveTypes(drive.type, impact.type);
-        });
+    // Track which drives have been updated
+    std::vector<bool> updated(npc->drives.size(), false);
+    
+    // First pass: apply impacts
+    for (size_t i = 0; i < npc->drives.size(); ++i) {
+      const auto& drive = npc->drives[i];
+      bool found_impact = false;
       
-      if (it != updated_drives.end()) {
-        // Apply the impact, scaled by effectiveness
-        float new_intensity = it->intensity + (impact.intensity * action_effectiveness);
-        
-        // Ensure intensity stays within bounds (0-100)
-        new_intensity = std::max(0.0f, std::min(100.0f, new_intensity));
-        
-        // Replace with updated drive
-        *it = Drive(it->type, new_intensity);
+      // Check if this drive has a matching impact
+      for (const auto& impact : action.expected_impacts) {
+        if (drive_impact_system::areSameDriveTypes(drive.type, impact.type)) {
+          // Apply the impact, scaled by effectiveness
+          float new_intensity = drive.intensity + (impact.intensity * action_effectiveness);
+          
+          // Ensure intensity stays within bounds (0-100)
+          new_intensity = std::max(0.0f, std::min(100.0f, new_intensity));
+          
+          // Add updated drive
+          updated_drives.emplace_back(drive.type, new_intensity);
+          updated[i] = true;
+          found_impact = true;
+          break;
+        }
+      }
+      
+      // If no impact for this drive, copy the original
+      if (!found_impact) {
+        updated_drives.push_back(drive);
       }
     }
+    
     
     // Create a new NPC with updated drives
     NPC updated_npc(

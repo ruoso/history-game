@@ -250,17 +250,27 @@ namespace drive_impact_system {
     const std::vector<Drive>& impacts,
     const std::vector<Drive>& current_drives
   ) {
-    std::vector<Drive> adjusted_impacts = impacts;
+    std::vector<Drive> adjusted_impacts;
+    adjusted_impacts.reserve(impacts.size());
     
-    for (auto& impact : adjusted_impacts) {
+    for (const auto& impact : impacts) {
+      bool found_matching_drive = false;
+      
       // Find the current level of this drive
       for (const auto& drive : current_drives) {
         if (areSameDriveTypes(impact.type, drive.type)) {
           // Higher drive intensity means higher impact magnitude
           float intensity_factor = drive.intensity / 100.0f;
-          impact = Drive(impact.type, impact.intensity * (1.0f + intensity_factor));
+          float new_intensity = impact.intensity * (1.0f + intensity_factor);
+          adjusted_impacts.emplace_back(impact.type, new_intensity);
+          found_matching_drive = true;
           break;
         }
+      }
+      
+      // If no matching drive was found, just copy the original impact
+      if (!found_matching_drive) {
+        adjusted_impacts.push_back(impact);
       }
     }
     

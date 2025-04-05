@@ -50,6 +50,16 @@ struct NPCIdentity {
       current_action(action),
       target_entity(target),
       target_object(std::nullopt) {}
+      
+  // Overload for ActionType variant with entity target
+  NPCIdentity(
+    const Entity::ref_type& entity_ref,
+    const ActionType& action,
+    const Entity::ref_type& target
+  ) : entity(entity_ref),
+      current_action(action),
+      target_entity(target),
+      target_object(std::nullopt) {}
   
   // Constructor with action targeting object
   template<ActionTypeConcept T>
@@ -62,11 +72,30 @@ struct NPCIdentity {
       target_entity(std::nullopt),
       target_object(object) {}
   
+  // Overload for ActionType variant with object target
+  NPCIdentity(
+    const Entity::ref_type& entity_ref,
+    const ActionType& action,
+    const WorldObjectRef& object
+  ) : entity(entity_ref),
+      current_action(action),
+      target_entity(std::nullopt),
+      target_object(object) {}
+  
   // Constructor with untargeted action
   template<ActionTypeConcept T>
   NPCIdentity(
     const Entity::ref_type& entity_ref,
     T action
+  ) : entity(entity_ref),
+      current_action(action),
+      target_entity(std::nullopt),
+      target_object(std::nullopt) {}
+      
+  // Overload for ActionType variant with no target
+  NPCIdentity(
+    const Entity::ref_type& entity_ref,
+    const ActionType& action
   ) : entity(entity_ref),
       current_action(action),
       target_entity(std::nullopt),

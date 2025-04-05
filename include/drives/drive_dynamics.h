@@ -6,6 +6,7 @@
 #include <spdlog/spdlog.h>
 #include "npc/npc.h"
 #include "npc/drive.h"
+#include "drives/drive_impact.h"
 
 namespace history_game {
 

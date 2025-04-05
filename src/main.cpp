@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <map>
+#include <set>
 #include <cpioo/managed_entity.hpp>
 #include <spdlog/spdlog.h>
 
@@ -108,23 +110,35 @@ int main() {
     SimulationClock clock(0, 1, 100);  // Start at tick 0, generation 1, 100 ticks per generation
     auto clock_ref = SimulationClock::storage::make_entity(std::move(clock));
     
-    // Create NPCs
+    // Create a larger world space
+    const float WORLD_SIZE = 1000.0f;
+    
+    // Create 100 NPCs distributed across the world space
     std::vector<NPC::ref_type> npcs;
-    for (int i = 0; i < 5; ++i) {
-        npcs.push_back(createNPC("npc", 0.0f, 100.0f, 0.0f, 100.0f));
+    for (int i = 0; i < 100; ++i) {
+        npcs.push_back(createNPC("npc", 0.0f, WORLD_SIZE, 0.0f, WORLD_SIZE));
     }
     
     // Create some initial objects
     std::vector<WorldObject::ref_type> objects;
     
-    // Add some food objects
-    for (int i = 0; i < 3; ++i) {
-        objects.push_back(createFoodObject("food", 10.0f, 90.0f, 10.0f, 90.0f, npcs[0]->identity));
+    // Random device for object creation
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> npc_dis(0, npcs.size() - 1);
+    
+    // Add food objects (50) spread across the world space
+    for (int i = 0; i < 50; ++i) {
+        // Randomly select an NPC to be the creator
+        int npc_idx = npc_dis(gen);
+        objects.push_back(createFoodObject("food", 0.0f, WORLD_SIZE, 0.0f, WORLD_SIZE, npcs[npc_idx]->identity));
     }
     
-    // Add some structure objects
-    for (int i = 0; i < 2; ++i) {
-        objects.push_back(createStructureObject("shelter", 20.0f, 80.0f, 20.0f, 80.0f, npcs[0]->identity));
+    // Add structure objects (50) spread across the world space
+    for (int i = 0; i < 50; ++i) {
+        // Randomly select an NPC to be the creator
+        int npc_idx = npc_dis(gen);
+        objects.push_back(createStructureObject("shelter", 0.0f, WORLD_SIZE, 0.0f, WORLD_SIZE, npcs[npc_idx]->identity));
     }
     
     // Create the initial world state
@@ -142,23 +156,98 @@ int main() {
         2      // Min sequence length
     );
     
-    // Run the simulation for 20 ticks
-    world_ref = simulation_runner_system::runSimulation(
+    // Run the simulation for 200 ticks (2 generations) as a test
+    // Change back to 1000 for full simulation
+    World::ref_type final_world = simulation_runner_system::runSimulation(
         world_ref, 
-        20,
+        200,
         params, 
-        15.0f  // Perception range
+        100.0f  // Increased perception range for larger world
     );
+    
+    // Update our output reference without assignment
+    // Use final_world for outputs below
     
     // Print final state summary
     spdlog::info("Simulation completed");
-    spdlog::info("Final tick: {}", world_ref->clock->current_tick);
-    spdlog::info("Final generation: {}", world_ref->clock->current_generation);
-    spdlog::info("NPCs: {}", world_ref->npcs.size());
-    spdlog::info("Objects: {}", world_ref->objects.size());
+    spdlog::info("Final tick: {}", final_world->clock->current_tick);
+    spdlog::info("Final generation: {}", final_world->clock->current_generation);
+    spdlog::info("NPCs: {}", final_world->npcs.size());
+    spdlog::info("Objects: {}", final_world->objects.size());
     
-    // Print NPC state summary
-    for (const auto& npc : world_ref->npcs) {
+    // Print summary statistics instead of individual NPCs
+    spdlog::info("NPC Population Summary:");
+    
+    // Count NPCs by action type
+    std::map<std::string, int> action_counts;
+    int no_action_count = 0;
+    
+    // Count perception and memory statistics
+    int total_perceptions = 0;
+    int total_episodes = 0;
+    
+    // Count average drive levels
+    std::map<std::string, float> total_drive_values;
+    std::map<std::string, int> drive_counts;
+    
+    for (const auto& npc : final_world->npcs) {
+        // Count actions
+        if (npc->identity->current_action) {
+            std::string action_name = action_selection_system::get_action_name(npc->identity->current_action.value());
+            action_counts[action_name]++;
+        } else {
+            no_action_count++;
+        }
+        
+        // Count perceptions and memories
+        total_perceptions += npc->perception->recent_perceptions.size();
+        total_episodes += npc->episodic_memory.size();
+        
+        // Sum drive values
+        for (const auto& drive : npc->drives) {
+            std::string drive_name = drive_dynamics_system::get_drive_name(drive.type);
+            total_drive_values[drive_name] += drive.intensity;
+            drive_counts[drive_name]++;
+        }
+    }
+    
+    // Print action statistics
+    spdlog::info("Action Distribution:");
+    for (const auto& [action, count] : action_counts) {
+        spdlog::info("  {}: {} NPCs ({:.1f}%)", 
+                    action, count, (count * 100.0f) / final_world->npcs.size());
+    }
+    if (no_action_count > 0) {
+        spdlog::info("  No Action: {} NPCs ({:.1f}%)", 
+                    no_action_count, (no_action_count * 100.0f) / final_world->npcs.size());
+    }
+    
+    // Print memory statistics
+    float avg_perceptions = total_perceptions / static_cast<float>(final_world->npcs.size());
+    float avg_episodes = total_episodes / static_cast<float>(final_world->npcs.size());
+    spdlog::info("Memory Statistics:");
+    spdlog::info("  Average perception buffer size: {:.2f}", avg_perceptions);
+    spdlog::info("  Average episodic memories: {:.2f}", avg_episodes);
+    spdlog::info("  Total episodic memories: {}", total_episodes);
+    
+    // Print drive statistics
+    spdlog::info("Average Drive Levels:");
+    for (const auto& [drive_name, total] : total_drive_values) {
+        float avg = total / drive_counts[drive_name];
+        spdlog::info("  {}: {:.2f}", drive_name, avg);
+    }
+    
+    // Print 5 random NPCs for a more detailed view
+    spdlog::info("\nDetailed view of 5 random NPCs:");
+    std::uniform_int_distribution<> sample_dis(0, final_world->npcs.size() - 1);
+    
+    std::set<int> sampled_indices;
+    while (sampled_indices.size() < 5 && sampled_indices.size() < final_world->npcs.size()) {
+        sampled_indices.insert(sample_dis(gen));
+    }
+    
+    for (int idx : sampled_indices) {
+        const auto& npc = final_world->npcs[idx];
         spdlog::info("NPC {}: Position ({:.2f}, {:.2f})", 
                     npc->identity->entity->id,
                     npc->identity->entity->position.x,

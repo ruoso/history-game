@@ -113,22 +113,32 @@ namespace memory_system {
     size_t max_buffer_size = 20
   ) {
     // Combine existing entries with new ones
-    std::vector<MemoryEntry::ref_type> updated_entries = buffer->recent_perceptions;
+    std::vector<MemoryEntry::ref_type> updated_entries;
+    updated_entries.reserve(buffer->recent_perceptions.size() + new_entries.size());
+    
+    // Copy existing entries
+    for (const auto& entry : buffer->recent_perceptions) {
+      updated_entries.push_back(entry);
+    }
     
     // Add new entries
-    updated_entries.insert(
-      updated_entries.end(),
-      new_entries.begin(),
-      new_entries.end()
-    );
+    for (const auto& entry : new_entries) {
+      updated_entries.push_back(entry);
+    }
     
     // Trim to max size if needed
     if (updated_entries.size() > max_buffer_size) {
-      // Remove oldest entries (from the beginning of the vector)
-      updated_entries.erase(
-        updated_entries.begin(),
-        updated_entries.begin() + (updated_entries.size() - max_buffer_size)
-      );
+      // Create a new vector with only the most recent entries
+      std::vector<MemoryEntry::ref_type> trimmed_entries;
+      trimmed_entries.reserve(max_buffer_size);
+      
+      // Copy only the newest entries (from the end of the vector)
+      for (size_t i = updated_entries.size() - max_buffer_size; i < updated_entries.size(); ++i) {
+        trimmed_entries.push_back(updated_entries[i]);
+      }
+      
+      // Replace with the trimmed vector
+      updated_entries = std::move(trimmed_entries);
     }
     
     // Create and return a new perception buffer
