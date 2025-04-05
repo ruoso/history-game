@@ -5,6 +5,8 @@
 #include <tuple>
 #include <cmath>
 #include <variant>
+#include <unordered_map>
+#include <algorithm>
 #include <spdlog/spdlog.h>
 #include "world/world.h"
 #include "npc/npc.h"
@@ -41,6 +43,14 @@ namespace perception_system {
     ) : perceiver(npc),
         perceived(entity),
         distance(dist) {}
+  };
+
+  /**
+   * Simple spatial cell for partitioning
+   */
+  struct SpatialCell {
+    std::vector<NPC::ref_type> npcs;
+    std::vector<WorldObject::ref_type> objects;
   };
 
   /**
@@ -135,9 +145,27 @@ namespace perception_system {
       return get_entity_id(e);
     }, entity);
   }
+  
+  /**
+   * Calculate cell index for a position
+   */
+  inline std::pair<int, int> getCellIndices(const Position& pos, float cell_size) {
+    int x_idx = static_cast<int>(pos.x / cell_size);
+    int y_idx = static_cast<int>(pos.y / cell_size);
+    return {x_idx, y_idx};
+  }
+
+  /**
+   * Create cell key from indices
+   */
+  inline int64_t getCellKey(int x_idx, int y_idx) {
+    // Combine x and y indices into a single key
+    return (static_cast<int64_t>(x_idx) << 32) | static_cast<uint32_t>(y_idx);
+  }
 
   /**
    * Find all entity pairs within perception range of each other
+   * using spatial partitioning for improved efficiency
    * 
    * @param world The current world state
    * @param max_distance Maximum distance for perception
@@ -149,45 +177,82 @@ namespace perception_system {
   ) {
     std::vector<PerceptionPair> result;
     
-    // For each NPC...
+    // Choose cell size based on perception distance
+    float cell_size = max_distance;
+    
+    // Create spatial grid
+    std::unordered_map<int64_t, SpatialCell> grid;
+    
+    // Populate the grid with NPCs
+    for (const auto& npc : world->npcs) {
+      const Position& pos = getPosition(npc);
+      auto [x_idx, y_idx] = getCellIndices(pos, cell_size);
+      grid[getCellKey(x_idx, y_idx)].npcs.push_back(npc);
+    }
+    
+    // Populate the grid with objects
+    for (const auto& obj : world->objects) {
+      const Position& pos = getPosition(obj);
+      auto [x_idx, y_idx] = getCellIndices(pos, cell_size);
+      grid[getCellKey(x_idx, y_idx)].objects.push_back(obj);
+    }
+    
+    // For each NPC, check nearby cells for perceptible entities
     for (const auto& npc : world->npcs) {
       const Position& npc_pos = getPosition(npc);
+      auto [center_x, center_y] = getCellIndices(npc_pos, cell_size);
       
-      // Check other NPCs
-      for (const auto& other_npc : world->npcs) {
-        // Skip self
-        if (getId(npc) == getId(other_npc)) {
-          continue;
-        }
-        
-        const Position& other_pos = getPosition(other_npc);
-        float distance = calculateDistance(npc_pos, other_pos);
-        
-        if (distance <= max_distance) {
-          // Log the perception
-          const std::string observer_id = get_entity_id(npc);
-          const std::string observed_id = get_entity_id(other_npc);
-          spdlog::debug("NPC {} perceives NPC {} at distance {:.2f}", 
-                        observer_id, observed_id, distance);
-                      
-          result.emplace_back(npc, PerceivableEntity{other_npc}, distance);
-        }
-      }
-      
-      // Check world objects
-      for (const auto& object : world->objects) {
-        const Position& obj_pos = getPosition(object);
-        float distance = calculateDistance(npc_pos, obj_pos);
-        
-        if (distance <= max_distance) {
-          // Log the perception
-          const std::string observer_id = get_entity_id(npc);
-          const std::string object_id = get_entity_id(object);
-          const std::string object_type = get_entity_type_name(object);
-          spdlog::debug("NPC {} perceives {} {} at distance {:.2f}", 
-                        observer_id, object_type, object_id, distance);
-                      
-          result.emplace_back(npc, PerceivableEntity{object}, distance);
+      // Check cells in the 3x3 grid centered on the NPC's cell
+      for (int x_offset = -1; x_offset <= 1; ++x_offset) {
+        for (int y_offset = -1; y_offset <= 1; ++y_offset) {
+          int x_idx = center_x + x_offset;
+          int y_idx = center_y + y_offset;
+          int64_t cell_key = getCellKey(x_idx, y_idx);
+          
+          // Skip if the cell doesn't exist
+          if (grid.find(cell_key) == grid.end()) {
+            continue;
+          }
+          
+          const SpatialCell& cell = grid[cell_key];
+          
+          // Check other NPCs in this cell
+          for (const auto& other_npc : cell.npcs) {
+            // Skip self
+            if (getId(npc) == getId(other_npc)) {
+              continue;
+            }
+            
+            const Position& other_pos = getPosition(other_npc);
+            float distance = calculateDistance(npc_pos, other_pos);
+            
+            if (distance <= max_distance) {
+              // Log the perception
+              const std::string observer_id = get_entity_id(npc);
+              const std::string observed_id = get_entity_id(other_npc);
+              spdlog::debug("NPC {} perceives NPC {} at distance {:.2f}", 
+                          observer_id, observed_id, distance);
+                        
+              result.emplace_back(npc, PerceivableEntity{other_npc}, distance);
+            }
+          }
+          
+          // Check objects in this cell
+          for (const auto& object : cell.objects) {
+            const Position& obj_pos = getPosition(object);
+            float distance = calculateDistance(npc_pos, obj_pos);
+            
+            if (distance <= max_distance) {
+              // Log the perception
+              const std::string observer_id = get_entity_id(npc);
+              const std::string object_id = get_entity_id(object);
+              const std::string object_type = get_entity_type_name(object);
+              spdlog::debug("NPC {} perceives {} {} at distance {:.2f}", 
+                          observer_id, object_type, object_id, distance);
+                        
+              result.emplace_back(npc, PerceivableEntity{object}, distance);
+            }
+          }
         }
       }
     }
