@@ -7,71 +7,71 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>History Game Simulation Visualizer</h1>
-            <div class="controls">
-                <div class="file-controls">
-                    <input type="file" id="logFile" accept=".json">
-                    <button id="loadButton">Load Simulation</button>
-                </div>
-                <div class="playback-controls">
-                    <button id="playPauseButton" disabled>Play</button>
-                    <button id="stepBackButton" disabled>◀</button>
-                    <button id="stepForwardButton" disabled>▶</button>
-                    <div class="speed-control">
-                        <label for="playbackSpeed">Speed:</label>
-                        <input type="range" id="playbackSpeed" min="0.1" max="10" step="0.1" value="1" disabled>
-                        <span id="speedDisplay">1x</span>
-                    </div>
-                </div>
-                <div class="timeline-control">
-                    <input type="range" id="timelineSlider" min="0" max="100" value="0" disabled>
-                    <div class="timeline-info">
-                        <span>Tick: <span id="currentTick">-</span></span>
-                        <span>Generation: <span id="currentGeneration">-</span></span>
-                    </div>
-                </div>
-            </div>
-        </header>
+    <!-- Main canvas container that fills the entire screen -->
+    <div class="map-container">
+        <canvas id="worldCanvas"></canvas>
+    </div>
+    
+    <!-- Control panel overlay -->
+    <div class="control-panel">
+        <div class="panel-header">
+            <h2>History Game</h2>
+            <button class="toggle-panel" id="togglePanel">-</button>
+        </div>
         
-        <main>
-            <div class="visualization-container">
-                <canvas id="worldCanvas"></canvas>
-                <div class="legend">
-                    <div class="legend-item"><span class="legend-color npc"></span> NPC</div>
-                    <div class="legend-item"><span class="legend-color food"></span> Food</div>
-                    <div class="legend-item"><span class="legend-color shelter"></span> Shelter</div>
-                    <div class="legend-item"><span class="legend-color perception"></span> Perception</div>
-                    <div class="legend-item"><span class="legend-color action"></span> Action</div>
+        <div class="panel-content">
+            <div class="file-controls">
+                <input type="file" id="logFile" accept=".json">
+                <button id="loadButton">Load Simulation</button>
+            </div>
+            
+            <div class="playback-controls">
+                <button id="playPauseButton" disabled>Play</button>
+                <button id="stepForwardButton" disabled>▶</button>
+                <div class="speed-control">
+                    <label for="playbackSpeed">Ticks/s:</label>
+                    <input type="range" id="playbackSpeed" min="1" max="30" step="1" value="5" disabled>
+                    <span id="speedDisplay">5</span>
                 </div>
             </div>
             
-            <div class="details-panel">
-                <div class="panel-section">
-                    <h3>Simulation Stats</h3>
-                    <div id="simulation-stats">
-                        <div>NPCs: <span id="npcCount">-</span></div>
-                        <div>Objects: <span id="objectCount">-</span></div>
-                        <div>Total Ticks: <span id="totalTicks">-</span></div>
-                    </div>
-                </div>
-                
-                <div class="panel-section">
-                    <h3>Selected Entity</h3>
-                    <div id="entity-details">
-                        <p>Click on an entity to see details</p>
-                    </div>
-                </div>
-                
-                <div class="panel-section">
-                    <h3>Event Log</h3>
-                    <div id="event-log">
-                        <p>Simulation events will appear here</p>
-                    </div>
+            <div class="timeline-info">
+                <span>Tick: <span id="currentTick">-</span></span>
+                <span>Generation: <span id="currentGeneration">-</span></span>
+            </div>
+            
+            <div class="panel-section">
+                <h3>Simulation Stats</h3>
+                <div id="simulation-stats">
+                    <div>NPCs: <span id="npcCount">-</span></div>
+                    <div>Objects: <span id="objectCount">-</span></div>
+                    <div>Total Ticks: <span id="totalTicks">-</span></div>
                 </div>
             </div>
-        </main>
+            
+            <div class="panel-section">
+                <h3>Selected Entity</h3>
+                <div id="entity-details">
+                    <p>Click on an entity to see details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Map controls and legend overlays -->
+    <div class="map-overlays">
+        <div class="legend">
+            <div class="legend-item"><span class="legend-color npc"></span> NPC</div>
+            <div class="legend-item"><span class="legend-color food"></span> Food</div>
+            <div class="legend-item"><span class="legend-color shelter"></span> Shelter</div>
+            <div class="legend-item"><span class="legend-color perception"></span> Perception</div>
+            <div class="legend-item"><span class="legend-color action"></span> Action</div>
+        </div>
+        
+        <div class="canvas-controls">
+            <div>Zoom: <span id="zoomDisplay">100%</span></div>
+            <div>Pan with left mouse button | Zoom with mouse wheel</div>
+        </div>
     </div>
     
     <script src="js/visualizer.js"></script>

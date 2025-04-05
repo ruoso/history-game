@@ -8,49 +8,128 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f5f5f5;
     color: #333;
+    overflow: hidden; /* Prevent scrollbars */
+    height: 100vh;
+    width: 100vw;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+/* Map container styles */
+.map-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
 }
 
-header {
-    background-color: #fff;
-    padding: 20px;
+#worldCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background-color: #f8f9fa; /* Light map background */
+}
+
+/* Control panel styles */
+.control-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 350px;
+    background-color: rgba(255, 255, 255, 0.95);
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    overflow: hidden;
+    transition: height 0.3s ease, width 0.3s ease;
 }
 
-h1 {
-    color: #2c3e50;
-    text-align: center;
-    margin-bottom: 20px;
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #2c3e50;
+    color: white;
 }
 
-.controls {
+.panel-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.toggle-panel {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.panel-content {
+    padding: 15px;
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-.file-controls, .playback-controls, .timeline-control {
+/* Map overlays */
+.map-overlays {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    z-index: 5;
+    pointer-events: none; /* Let clicks pass through to the map */
+    display: flex;
+    justify-content: space-between;
+}
+
+.map-overlays > * {
+    pointer-events: auto; /* Make the actual controls clickable */
+}
+
+.legend {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    max-width: 200px;
+}
+
+.canvas-controls {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    font-size: 12px;
+}
+
+/* UI Components */
+.file-controls, .playback-controls {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.timeline-control {
-    flex-direction: column;
-    align-items: stretch;
-}
-
 .timeline-info {
     display: flex;
     justify-content: space-between;
+    padding: 10px;
+    background-color: #f1f5f9;
+    border-radius: 4px;
+}
+
+.panel-section {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 15px;
 }
 
 button {
@@ -90,38 +169,26 @@ input[type="range"] {
     gap: 8px;
 }
 
-main {
+h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    font-size: 16px;
+}
+
+#simulation-stats {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
-.visualization-container {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    position: relative;
-    height: 600px;
+#entity-details {
+    max-height: 300px;
+    overflow-y: auto;
 }
 
-#worldCanvas {
-    width: 100%;
-    height: 100%;
-    border: 1px solid #ddd;
-    background-color: #f8f9fa;
-}
-
-.legend {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-}
-
+/* Legend items */
 .legend-item {
     display: flex;
     align-items: center;
@@ -153,43 +220,6 @@ main {
 
 .legend-color.action {
     background-color: #e74c3c;
-}
-
-.details-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.panel-section {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-}
-
-h3 {
-    margin-bottom: 15px;
-    color: #2c3e50;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
-}
-
-#simulation-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-#entity-details, #event-log {
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-#event-log p {
-    margin-bottom: 8px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #eee;
 }
 
 .highlight {
@@ -240,4 +270,27 @@ h3 {
     color: white;
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
     font-size: 12px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .control-panel {
+        width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .control-panel {
+        width: 100%;
+        top: 0;
+        right: 0;
+        max-height: 50vh;
+        border-radius: 0 0 8px 8px;
+    }
+    
+    .map-overlays {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
 }
