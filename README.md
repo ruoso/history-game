@@ -21,6 +21,8 @@ This C++20 project uses:
 - GoogleTest for testing
 - Immutable data structures for simulation state
 
+See the [System Architecture](docs/system_architecture.md) for a detailed overview of the components and their relationships.
+
 ## Building
 
 ```bash
@@ -42,6 +44,15 @@ cd build && ctest
 - NPCIdentity pattern to prevent circular references
 - Drive-based action selection and emotional state management
 
+## Optimization Features
+
+The simulation is designed to efficiently handle large numbers of NPCs and objects:
+
+- **Spatial Partitioning**: The perception system uses a grid-based spatial partitioning algorithm to reduce complexity from O(n²) to closer to O(n).
+- **Efficient Memory Management**: The inside-out-objects library provides reference counting and memory reuse.
+- **Component-Based Architecture**: Clear separation of systems allows for targeted optimizations.
+- **Immutable Data**: All data structures are immutable, allowing for lockless parallelism in future implementations.
+
 ## Status
 
-This project is in early development. The core data structures and architecture are in place, but the simulation logic and rendering are still being implemented.
+This project is in early development. The core data structures and architecture are in place, but additional simulation features and rendering are still being implemented.
