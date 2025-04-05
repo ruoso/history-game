@@ -32,6 +32,8 @@ A simulation game focusing on emergent culture, behavior, and history in a speec
   - Use component-based design with clear separation of concerns
   - Use cpioo::managed_entity::storage for entity storage and memory management
   - Use concepts whenever you define an abstract concept that will be a template parameter
+  - Always prefer visit with adl instead of `if constexpr`
+  - Managed entity references can only be created by using the `make_entity` function in the `storage` type for that struct.
 
 ## Documentation
 - Comment classes and public methods using Doxygen style

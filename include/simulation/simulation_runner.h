@@ -9,6 +9,7 @@
 #include "memory/memory_system.h"
 #include "world/simulation_clock.h"
 #include "utility/serialization.h"
+#include "action/action_execution.h"
 
 namespace history_game {
 
@@ -79,11 +80,15 @@ namespace simulation_runner_system {
     // 1. Update all NPCs (including action selection)
     spdlog::debug("Updating NPCs (count: {})", world->npcs.size());
     auto world_with_actions = npc_update_system::updateAllNPCs(world, params);
+
+    // 2. Execute NPC actions
+    spdlog::debug("Executing NPC actions");
+    auto world_after_actions = action_execution_system::executeAllActions(world_with_actions, logger);
     
-    // 2. Process perceptions based on the new actions
+    // 3. Process perceptions based on the new actions
     spdlog::debug("Processing perceptions (range: {:.2f})", perception_range);
     auto world_with_perceptions = memory_system::processPerceptions(
-      world_with_actions,
+      world_after_actions,
       perception_range
     );
     

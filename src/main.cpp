@@ -163,11 +163,68 @@ int main() {
     spdlog::info("Starting simulation with {} NPCs and {} objects", 
                 npcs.size(), objects.size());
     
-    // Log simulation start event
+    // Prepare entity data for simulation start event
+    std::vector<serialization::json> entity_data;
+    
+    // Add all NPCs to the entity list
+    for (const auto& npc : npcs) {
+        serialization::json npc_json;
+        npc_json["id"] = npc->identity->entity->id;
+        npc_json["type"] = "NPC";
+        
+        // Add position data
+        serialization::json position;
+        position["x"] = npc->identity->entity->position.x;
+        position["y"] = npc->identity->entity->position.y;
+        npc_json["position"] = position;
+        
+        // Add drives data
+        serialization::json drives_json = serialization::json::array();
+        for (const auto& drive : npc->drives) {
+            serialization::json drive_json;
+            drive_json["type"] = drive_dynamics_system::get_drive_name(drive.type);
+            drive_json["value"] = drive.intensity;
+            drives_json.push_back(drive_json);
+        }
+        npc_json["drives"] = drives_json;
+        
+        // Add to entity list
+        entity_data.push_back(npc_json);
+    }
+    
+    // Add all objects to the entity list
+    for (const auto& obj : objects) {
+        serialization::json obj_json;
+        obj_json["id"] = obj->entity->id;
+        
+        // Determine type based on category
+        std::string type = "Object";
+        std::visit([&](const auto& category) {
+            using CategoryType = std::decay_t<decltype(category)>;
+            if constexpr (std::is_same_v<CategoryType, object_category::Food>) {
+                type = "Food";
+            } else if constexpr (std::is_same_v<CategoryType, object_category::Structure>) {
+                type = "Structure";
+            }
+        }, obj->category);
+        
+        obj_json["type"] = type;
+        
+        // Add position data
+        serialization::json position;
+        position["x"] = obj->entity->position.x;
+        position["y"] = obj->entity->position.y;
+        obj_json["position"] = position;
+        
+        // Add to entity list
+        entity_data.push_back(obj_json);
+    }
+    
+    // Log simulation start event with world size and entities
     uint64_t current_time = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     sim_logger.logEvent(serialization::createSimulationStartEvent(
-        current_time, npcs.size(), objects.size()));
+        current_time, npcs.size(), objects.size(), WORLD_SIZE, entity_data));
     
     // Create simulation parameters
     NPCUpdateParams params(

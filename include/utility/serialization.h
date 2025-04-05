@@ -95,8 +95,11 @@ struct TickEndData : EventData {
 struct SimulationStartData : EventData {
     uint32_t npc_count;
     uint32_t object_count;
+    float world_size;
+    std::vector<json> entities; // Contains data for all initial entities
     
-    SimulationStartData(uint64_t time, uint32_t npcs, uint32_t objects);
+    SimulationStartData(uint64_t time, uint32_t npcs, uint32_t objects, 
+                       float size = 1000.0f, const std::vector<json>& entity_data = {});
     json serialize() const override;
 };
 
@@ -168,7 +171,8 @@ json serializeEvent(const SimulationEvent& event);
 SimulationEvent createTickStartEvent(uint64_t time, uint64_t tick, uint32_t gen);
 SimulationEvent createTickEndEvent(uint64_t time, uint64_t tick, uint32_t gen, 
                                  uint32_t npcs, uint32_t objects);
-SimulationEvent createSimulationStartEvent(uint64_t time, uint32_t npcs, uint32_t objects);
+SimulationEvent createSimulationStartEvent(uint64_t time, uint32_t npcs, uint32_t objects, 
+                                float world_size = 1000.0f, const std::vector<json>& entities = {});
 SimulationEvent createSimulationEndEvent(uint64_t time, uint64_t ticks, uint32_t gen, 
                                        uint32_t npcs, uint32_t objects);
 SimulationEvent createEntityUpdateEvent(uint64_t time, const std::string& id, 

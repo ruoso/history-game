@@ -92,9 +92,6 @@ namespace drive_dynamics_system {
     // Log significant drive changes (threshold of 1.0)
     if (std::abs(new_intensity - drive.intensity) >= 1.0f) {
       std::string drive_name = get_drive_name(drive.type);
-      spdlog::debug("Drive {} changed from {:.2f} to {:.2f} (change: {:.2f})", 
-                   drive_name, drive.intensity, new_intensity, 
-                   new_intensity - drive.intensity);
     }
     
     // Return updated drive
@@ -115,7 +112,6 @@ namespace drive_dynamics_system {
     
     // Log the update
     const std::string npc_id = npc->identity->entity->id;
-    spdlog::trace("Updating drives for NPC {} over {} ticks", npc_id, ticks_elapsed);
     
     for (const auto& drive : npc->drives) {
       updated_drives.push_back(

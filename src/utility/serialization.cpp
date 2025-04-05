@@ -40,8 +40,9 @@ json TickEndData::serialize() const {
     return j;
 }
 
-SimulationStartData::SimulationStartData(uint64_t time, uint32_t npcs, uint32_t objects)
-    : EventData(time), npc_count(npcs), object_count(objects) {}
+SimulationStartData::SimulationStartData(uint64_t time, uint32_t npcs, uint32_t objects,
+                                float size, const std::vector<json>& entity_data)
+    : EventData(time), npc_count(npcs), object_count(objects), world_size(size), entities(entity_data) {}
       
 json SimulationStartData::serialize() const {
     json j;
@@ -49,6 +50,13 @@ json SimulationStartData::serialize() const {
     j["type"] = event_type::SimulationStart{}.name;
     j["npc_count"] = npc_count;
     j["object_count"] = object_count;
+    j["world_size"] = world_size;
+    
+    // Add entities array if provided
+    if (!entities.empty()) {
+        j["entities"] = entities;
+    }
+    
     return j;
 }
 
@@ -134,8 +142,9 @@ SimulationEvent createTickEndEvent(uint64_t time, uint64_t tick, uint32_t gen,
     return TickEndData(time, tick, gen, npcs, objects);
 }
 
-SimulationEvent createSimulationStartEvent(uint64_t time, uint32_t npcs, uint32_t objects) {
-    return SimulationStartData(time, npcs, objects);
+SimulationEvent createSimulationStartEvent(uint64_t time, uint32_t npcs, uint32_t objects,
+                                float world_size, const std::vector<json>& entities) {
+    return SimulationStartData(time, npcs, objects, world_size, entities);
 }
 
 SimulationEvent createSimulationEndEvent(uint64_t time, uint64_t ticks, uint32_t gen, 
