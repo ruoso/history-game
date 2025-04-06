@@ -380,7 +380,6 @@ class SimulationVisualizer {
         const event = this.simulation.events[this.simulation.currentEventIndex];
         
         // Process the event
-        console.log(`Processing event ${this.simulation.currentEventIndex}:`, event.type);
         this.processEvent(event);
         
         // Move to the next event
@@ -434,20 +433,14 @@ class SimulationVisualizer {
             if (!tickProcessed || !this.simulation.isPlaying) {
                 return;
             }
-            
-            console.log(`Tick ${this.simulation.currentTickNumber} completed. Waiting ${tickDuration}ms for next tick.`);
         }
         
         // Calculate time before next tick
         const timeToNextTick = Math.max(0, tickDuration - (performance.now() - this.simulation.lastFrameTime));
-        console.log(`Time to next tick: ${timeToNextTick.toFixed(1)}ms`);
-        
         this.simulation.animationFrameId = requestAnimationFrame(() => this.animateSimulation());
     }
     
     processEvent(event) {
-        // Log all events for debugging
-        console.log("Processing event:", event.type, event);
         
         // Process based on event type
         switch (event.type) {
@@ -501,8 +494,6 @@ class SimulationVisualizer {
                                 drives: entity.drives
                             };
                             
-                            console.log(`Added entity ${entity.id} at position (${entity.position.x}, ${entity.position.y})`);
-                            
                             // Store entity in our map
                             this.simulation.entities.set(entity.id, entityData);
                         } else {
@@ -510,7 +501,6 @@ class SimulationVisualizer {
                         }
                     }
                     
-                    console.log(`Initialized ${this.simulation.entities.size} entities`);
                     
                     // Render the initial state
                     this.renderCurrentState();
@@ -525,11 +515,9 @@ class SimulationVisualizer {
                 
             case 'ENTITY_UPDATE':
                 // Inspect the event thoroughly
-                console.log("ENTITY_UPDATE event structure:", JSON.stringify(event, null, 2));
                 
                 // Store the entity update in our entities map
                 if (event.entity_id && event.position) {
-                    console.log("Updating entity:", event.entity_id, "at position", event.position);
                     
                     // Make sure to store a properly formatted entity object
                     const entityData = {
@@ -542,16 +530,6 @@ class SimulationVisualizer {
                     
                     // Store in our entity map
                     this.simulation.entities.set(event.entity_id, entityData);
-                    console.log("Entity map size after update:", this.simulation.entities.size);
-                    
-                    // Dump the first few entities for debugging
-                    if (this.simulation.entities.size < 5) {
-                        console.log("Current entities:", 
-                            Array.from(this.simulation.entities.entries())
-                                .map(([id, data]) => `${id}: (${data.position.x}, ${data.position.y})`).join(', '));
-                    }
-                } else {
-                    console.error("Invalid ENTITY_UPDATE event:", event);
                 }
                 
                 // Render after each entity update
@@ -560,7 +538,6 @@ class SimulationVisualizer {
                 
             case 'ACTION_EXECUTION':
                 // Store action for visualization
-                console.log("Recording action:", event.entity_id, event.action_type, event.target_id);
                 this.simulation.activeActions.set(event.entity_id, {
                     action: event.action_type,
                     target: event.target_id
@@ -588,7 +565,6 @@ class SimulationVisualizer {
     // Actions and perceptions are now tracked in simulation.activeActions
     
     renderCurrentState() {
-        console.log("Rendering state with", this.simulation.entities.size, "entities");
         
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -600,10 +576,7 @@ class SimulationVisualizer {
         
         // Draw entities from our state
         this.drawEntities();
-        
-        // Log entity positions
-        console.log("Active actions:", Array.from(this.simulation.activeActions.entries()));
-        
+                
         // Force a redraw
         this.canvas.style.display = 'none';
         this.canvas.offsetHeight; // Force reflow
@@ -702,15 +675,12 @@ class SimulationVisualizer {
         // Calculate scale factors with zoom
         const scaleX = (canvasWidth / worldSize) * zoomLevel;
         const scaleY = (canvasHeight / worldSize) * zoomLevel;
-        
-        console.log(`Canvas size: ${canvasWidth}x${canvasHeight}, Scale: ${scaleX}x${scaleY}, Zoom: ${zoomLevel}x`);
-        
+                
         // Extract entities from the simulation state
         const entities = [];
         
         // Collect all NPCs and objects from our stored entity state
         if (this.simulation && this.simulation.entities.size > 0) {
-            console.log(`Drawing ${this.simulation.entities.size} entities`);
             
             // Convert the entity updates to renderable entities
             for (const entity of this.simulation.entities.values()) {
@@ -719,10 +689,6 @@ class SimulationVisualizer {
                     console.log("Skipping entity without position or type:", entity);
                     continue;
                 }
-                
-                console.log("Processing entity for drawing:", entity.entity_id, 
-                            "at", entity.position.x, entity.position.y,
-                            "canvas coords:", entity.position.x * scaleX, entity.position.y * scaleY);
                 
                 // Apply zoom and panning to the coordinates
                 const worldX = entity.position.x;
@@ -774,17 +740,13 @@ class SimulationVisualizer {
         
         // Use the active actions map that we've built during event processing
         const activeActions = this.simulation.activeActions;
-        
-        console.log(`Drawing ${entities.length} entities`);
-        
+                
         // Draw all entities
         entities.forEach(entity => {
             let color;
             let size = 12;
             let shape = 'circle'; // Default shape
-            
-            console.log(`Drawing entity: ${entity.id}, type: ${entity.type}, at (${entity.x}, ${entity.y})`);
-            
+                        
             // Determine color and shape based on entity type
             if (entity.type === 'NPC') {
                 color = COLORS.NPC;
@@ -901,9 +863,7 @@ class SimulationVisualizer {
                 Math.pow(entityX - worldX, 2) + 
                 Math.pow(entityY - worldY, 2)
             );
-            
-            console.log(`Entity ${entity.entity_id} at (${entityX}, ${entityY}), distance: ${distance}`);
-            
+                        
             // If this is the closest entity within our threshold, select it
             if (distance < closestDistance) {
                 closestDistance = distance;
