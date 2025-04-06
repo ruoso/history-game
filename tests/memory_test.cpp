@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
-#include "memory/memory_entry.h"
-#include "memory/memory_episode.h"
-#include "memory/perception_buffer.h"
-#include "memory/memory_system.h"
-#include "memory/episode_formation.h"
-#include "entity/entity.h"
-#include "npc/npc.h"
-#include "npc/npc_identity.h"
-#include "action/action_type.h"
-#include "action/action_sequence.h"
+#include "datamodel/memory/memory_entry.h"
+#include "datamodel/memory/memory_episode.h"
+#include "datamodel/memory/perception_buffer.h"
+#include "systems/memory/memory_system.h"
+#include "systems/memory/episode_formation.h"
+#include "datamodel/entity/entity.h"
+#include "datamodel/npc/npc.h"
+#include "datamodel/npc/npc_identity.h"
+#include "datamodel/action/action_type.h"
+#include "datamodel/action/action_sequence.h"
 
 using namespace history_game;
 
