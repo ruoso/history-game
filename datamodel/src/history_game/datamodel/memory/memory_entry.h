@@ -10,7 +10,7 @@
 #include <history_game/datamodel/action/action_type.h>
 #include <history_game/datamodel/object/object.h>
 
-namespace history_game {
+namespace history_game::datamodel::memory {
 
 /**
  * Represents a single observed action or event
@@ -21,24 +21,24 @@ struct MemoryEntry {
   const uint64_t timestamp;
   
   // Who performed the action
-  const NPCIdentity::ref_type actor;
+  const npc::NPCIdentity::ref_type actor;
   
   // The action that was observed
-  const ActionType action;
+  const action::ActionType action;
   
   // Target of the action, if any (optional)
-  const std::optional<Entity::ref_type> target_entity;
+  const std::optional<entity::Entity::ref_type> target_entity;
   
   // Object involved in the action, if any (optional)
-  const std::optional<WorldObject::ref_type> target_object;
+  const std::optional<object::WorldObject::ref_type> target_object;
   
   // Constructor for action with entity target
-  template<ActionTypeConcept T>
+  template<action::ActionTypeConcept T>
   MemoryEntry(
     uint64_t time, 
-    const NPCIdentity::ref_type& actor_ref,
+    const npc::NPCIdentity::ref_type& actor_ref,
     T action_type,
-    const Entity::ref_type& entity_target
+    const entity::Entity::ref_type& entity_target
   ) : timestamp(time),
       actor(actor_ref),
       action(action_type),
@@ -46,12 +46,12 @@ struct MemoryEntry {
       target_object(std::nullopt) {}
   
   // Constructor for action with object target
-  template<ActionTypeConcept T>
+  template<action::ActionTypeConcept T>
   MemoryEntry(
     uint64_t time, 
-    const NPCIdentity::ref_type& actor_ref,
+    const npc::NPCIdentity::ref_type& actor_ref,
     T action_type,
-    const WorldObject::ref_type& object_target
+    const object::WorldObject::ref_type& object_target
   ) : timestamp(time),
       actor(actor_ref),
       action(action_type),
@@ -59,10 +59,10 @@ struct MemoryEntry {
       target_object(object_target) {}
   
   // Constructor for action without a target
-  template<ActionTypeConcept T>
+  template<action::ActionTypeConcept T>
   MemoryEntry(
     uint64_t time, 
-    const NPCIdentity::ref_type& actor_ref,
+    const npc::NPCIdentity::ref_type& actor_ref,
     T action_type
   ) : timestamp(time),
       actor(actor_ref),
@@ -75,6 +75,6 @@ struct MemoryEntry {
   using ref_type = storage::ref_type;
 };
 
-} // namespace history_game
+} // namespace history_game::datamodel::memory
 
 #endif // HISTORY_GAME_DATAMODEL_MEMORY_MEMORY_ENTRY_H

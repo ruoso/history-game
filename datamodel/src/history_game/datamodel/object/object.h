@@ -9,7 +9,7 @@
 #include <history_game/datamodel/entity/entity.h>
 #include <history_game/datamodel/npc/npc_identity.h>
 
-namespace history_game {
+namespace history_game::datamodel::object {
 
 /**
  * Strong types for object categories
@@ -65,20 +65,20 @@ using ObjectCategory = std::variant<
  */
 struct WorldObject {
   // Reference to the base entity
-  const Entity::ref_type entity;
+  const entity::Entity::ref_type entity;
   
   // Object category
   const ObjectCategory category;
   
   // Creator of this object (if any)
-  const NPCIdentity::ref_type created_by;
+  const npc::NPCIdentity::ref_type created_by;
   
   // Constructor
   template<ObjectCategoryConcept T>
   WorldObject(
-    const Entity::ref_type& entity_ref,
+    const entity::Entity::ref_type& entity_ref,
     T category_type,
-    const NPCIdentity::ref_type& creator
+    const npc::NPCIdentity::ref_type& creator
   ) : entity(entity_ref),
       category(category_type),
       created_by(creator) {}
@@ -88,6 +88,6 @@ struct WorldObject {
   using ref_type = storage::ref_type;
 };
 
-} // namespace history_game
+} // namespace history_game::datamodel::object
 
 #endif // HISTORY_GAME_DATAMODEL_OBJECT_OBJECT_H

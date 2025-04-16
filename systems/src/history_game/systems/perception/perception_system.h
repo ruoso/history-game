@@ -12,9 +12,7 @@
 #include <history_game/datamodel/npc/npc.h>
 #include <history_game/datamodel/object/object.h>
 
-namespace history_game {
-
-namespace perception_system {
+namespace history_game::systems::perception {
 
   /**
    * Represents an entity that can be perceived (NPC or WorldObject)
@@ -261,7 +259,5 @@ namespace perception_system {
   }
 
 } // namespace perception_system
-
-} // namespace history_game
 
 #endif // HISTORY_GAME_SYSTEMS_PERCEPTION_PERCEPTION_SYSTEM_H

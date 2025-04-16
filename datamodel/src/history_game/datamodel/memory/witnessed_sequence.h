@@ -8,17 +8,17 @@
 #include <history_game/datamodel/npc/npc_identity.h>
 #include <history_game/datamodel/npc/drive.h>
 
-namespace history_game {
+namespace history_game::datamodel::memory {
 
 /**
  * Perceived effectiveness of a sequence for a specific drive
  */
 struct PerceivedEffectiveness {
-  const DriveType drive_type;
+  const npc::DriveType drive_type;
   const float value;
   
   // Constructor
-  template<DriveTypeConcept T>
+  template<npc::DriveTypeConcept T>
   PerceivedEffectiveness(T type, float effectiveness)
     : drive_type(type), value(effectiveness) {}
 };
@@ -29,10 +29,10 @@ struct PerceivedEffectiveness {
  */
 struct WitnessedSequence {
   // The action sequence that was observed
-  const ActionSequence::ref_type sequence;
+  const action::ActionSequence::ref_type sequence;
   
   // The NPC who performed the sequence
-  const NPCIdentity::ref_type performer;
+  const npc::NPCIdentity::ref_type performer;
   
   // Number of times witnessed
   const uint32_t observation_count;
@@ -42,8 +42,8 @@ struct WitnessedSequence {
   
   // Constructor
   WitnessedSequence(
-    const ActionSequence::ref_type& action_sequence,
-    const NPCIdentity::ref_type& sequence_performer,
+    const action::ActionSequence::ref_type& action_sequence,
+    const npc::NPCIdentity::ref_type& sequence_performer,
     uint32_t times_witnessed,
     std::vector<PerceivedEffectiveness> drive_effectiveness
   ) : sequence(action_sequence),
@@ -56,6 +56,6 @@ struct WitnessedSequence {
   using ref_type = storage::ref_type;
 };
 
-} // namespace history_game
+} // namespace history_game::datamodel::memory
 
 #endif // HISTORY_GAME_DATAMODEL_MEMORY_WITNESSED_SEQUENCE_H

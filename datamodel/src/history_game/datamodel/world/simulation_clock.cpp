@@ -1,6 +1,6 @@
 // filepath: /home/ruoso/devel/history-game/src/history_game/datamodel/world/simulation_clock.cpp
 #include <history_game/datamodel/world/simulation_clock.h>
 
-namespace history_game {
+namespace history_game::datamodel::world {
 // Empty implementation file
 }

@@ -5,7 +5,7 @@
 #include <string>
 #include <cpioo/managed_entity.hpp>
 
-namespace history_game {
+namespace history_game::datamodel::world {
 
 /**
  * Manages simulation time and generational tracking
@@ -34,6 +34,6 @@ struct SimulationClock {
   using ref_type = storage::ref_type;
 };
 
-} // namespace history_game
+} // namespace history_game::datamodel::world
 
 #endif // HISTORY_GAME_DATAMODEL_WORLD_SIMULATION_CLOCK_H

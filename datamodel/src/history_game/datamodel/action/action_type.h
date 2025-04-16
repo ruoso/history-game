@@ -6,7 +6,7 @@
 #include <variant>
 #include <concepts>
 
-namespace history_game {
+namespace history_game::datamodel::action {
 
 /**
  * Strong types for different action types
@@ -79,6 +79,6 @@ using ActionType = std::variant<
   action_type::Follow
 >;
 
-} // namespace history_game
+} // namespace history_game::datamodel::action
 
 #endif // HISTORY_GAME_DATAMODEL_ACTION_ACTION_TYPE_H

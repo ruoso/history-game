@@ -8,17 +8,17 @@
 #include <history_game/datamodel/npc/drive.h>
 #include <history_game/datamodel/relationship/relationship_target.h>
 
-namespace history_game {
+namespace history_game::datamodel::relationship {
 
 /**
  * Represents emotional connection history for a drive
  */
 struct AffectiveTrace {
-  const DriveType drive_type;
+  const npc::DriveType drive_type;
   const float value;
   
   // Constructor
-  template<DriveTypeConcept T>
+  template<npc::DriveTypeConcept T>
   AffectiveTrace(T type, float trace_value)
     : drive_type(type), value(trace_value) {}
 };
@@ -92,7 +92,7 @@ namespace relationship_system {
    */
   inline std::optional<Relationship::ref_type> findLocationRelationship(
     const std::vector<Relationship::ref_type>& relationships,
-    const Position& position
+    const world::Position& position
   ) {
     for (const auto& rel : relationships) {
       // Only check LocationPoint targets
@@ -132,7 +132,7 @@ namespace relationship_system {
    */
   inline bool isFamiliarWithLocation(
     const std::vector<Relationship::ref_type>& relationships,
-    const Position& position,
+    const world::Position& position,
     float familiarity_threshold = 0.5f
   ) {
     auto rel = findLocationRelationship(relationships, position);
@@ -144,6 +144,6 @@ namespace relationship_system {
   }
 }
 
-} // namespace history_game
+} // namespace history_game::datamodel::relationship
 
 #endif // HISTORY_GAME_DATAMODEL_RELATIONSHIP_RELATIONSHIP_H

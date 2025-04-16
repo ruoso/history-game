@@ -7,21 +7,21 @@
 #include <cpioo/managed_entity.hpp>
 #include <history_game/datamodel/memory/memory_entry.h>
 
-namespace history_game {
+namespace history_game::datamodel::action {
 
 /**
  * Represents a step in an action sequence
  */
 struct ActionStep {
   // The memory entry for this action step
-  const MemoryEntry::ref_type memory;
+  const memory::MemoryEntry::ref_type memory;
   
   // Delay in ticks after the previous step
   const uint32_t delay_after_previous;
   
   // Constructor
   ActionStep(
-    const MemoryEntry::ref_type& memory_ref,
+    const memory::MemoryEntry::ref_type& memory_ref,
     uint32_t delay
   ) : memory(memory_ref),
       delay_after_previous(delay) {}
@@ -49,6 +49,6 @@ struct ActionSequence {
   using ref_type = storage::ref_type;
 };
 
-} // namespace history_game
+} // namespace history_game::datamodel::action
 
 #endif // HISTORY_GAME_DATAMODEL_ACTION_ACTION_SEQUENCE_H

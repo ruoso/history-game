@@ -1,6 +1,6 @@
 // filepath: /home/ruoso/devel/history-game/src/history_game/datamodel/npc/drive.cpp
 #include <history_game/datamodel/npc/drive.h>
 
-namespace history_game {
+namespace history_game::datamodel::npc {
 // Empty implementation file
 }

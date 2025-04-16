@@ -1,0 +1,1 @@
+#include <history_game/systems/utility/log_init.h>

@@ -13,7 +13,7 @@
 #include <history_game/datamodel/relationship/relationship.h>
 #include <history_game/datamodel/relationship/relationship_target.h>
 
-namespace history_game {
+namespace history_game::datamodel::npc {
 
 /**
  * NPC struct representing a non-player character (or player)
@@ -27,25 +27,25 @@ struct NPC {
   const std::vector<Drive> drives;
   
   // Reference to perception buffer
-  const PerceptionBuffer::ref_type perception;
+  const memory::PerceptionBuffer::ref_type perception;
   
   // Episodic memory - sequences that had emotional impact
-  const std::vector<MemoryEpisode::ref_type> episodic_memory;
+  const std::vector<memory::MemoryEpisode::ref_type> episodic_memory;
   
   // Observed behaviors
-  const std::vector<WitnessedSequence::ref_type> observed_behaviors;
+  const std::vector<memory::WitnessedSequence::ref_type> observed_behaviors;
   
   // Relationships with other NPCs (asymmetric)
-  const std::vector<Relationship::ref_type> relationships;
+  const std::vector<relationship::Relationship::ref_type> relationships;
   
   // Constructor
   NPC(
     const NPCIdentity::ref_type& npc_identity,
     std::vector<Drive> npc_drives,
-    const PerceptionBuffer::ref_type& perception_buffer,
-    std::vector<MemoryEpisode::ref_type> episodes,
-    std::vector<WitnessedSequence::ref_type> behaviors,
-    std::vector<Relationship::ref_type> npc_relationships
+    const memory::PerceptionBuffer::ref_type& perception_buffer,
+    std::vector<memory::MemoryEpisode::ref_type> episodes,
+    std::vector<memory::WitnessedSequence::ref_type> behaviors,
+    std::vector<relationship::Relationship::ref_type> npc_relationships
   ) : identity(npc_identity),
       drives(std::move(npc_drives)),
       perception(perception_buffer),
@@ -58,6 +58,6 @@ struct NPC {
   using ref_type = storage::ref_type;
 };
 
-} // namespace history_game
+} // namespace history_game::datamodel::npc
 
 #endif // HISTORY_GAME_DATAMODEL_NPC_NPC_H

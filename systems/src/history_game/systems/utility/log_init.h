@@ -8,8 +8,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
-namespace history_game {
-namespace log_init {
+namespace history_game::systems::utility {
 
 /**
  * Initialize spdlog with simulation settings
@@ -59,6 +58,5 @@ inline void shutdown() {
 }
 
 } // namespace log_init
-} // namespace history_game
 
 #endif // HISTORY_GAME_LOG_INIT_H

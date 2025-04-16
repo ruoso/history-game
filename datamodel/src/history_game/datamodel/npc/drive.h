@@ -5,7 +5,7 @@
 #include <variant>
 #include <concepts>
 
-namespace history_game {
+namespace history_game::datamodel::npc {
 
 /**
  * Strong types for each emotional drive

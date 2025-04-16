@@ -9,7 +9,7 @@
 #include <history_game/systems/behavior/action_selection.h>
 #include <history_game/systems/memory/episode_formation.h>
 
-namespace history_game {
+namespace history_game::systems::simulation {
 
 /**
  * Parameters for NPC updates

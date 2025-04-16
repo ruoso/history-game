@@ -5,12 +5,12 @@
 #include <history_game/datamodel/npc/drive.h>
 #include <history_game/datamodel/memory/perception_buffer.h>
 
-using namespace history_game;
+using namespace history_game::datamodel;
 
-// Test entity creation and immutability
+// Test entity::Entity creation and immutability
 TEST(EntityTest, CreateAndAccess) {
     // Create an entity
-    Entity entity("test_entity", Position(10.0f, 20.0f));
+    entity::Entity entity("test_entity",  world::Position(10.0f, 20.0f));
     
     // Check fields
     EXPECT_EQ(entity.id, "test_entity");
@@ -18,11 +18,11 @@ TEST(EntityTest, CreateAndAccess) {
     EXPECT_FLOAT_EQ(entity.position.y, 20.0f);
 }
 
-// Test managed entity reference
+// Test managed entity::Entity reference
 TEST(EntityTest, ManagedReference) {
-    // Create an entity through the storage system
-    Entity entity("test_entity", Position(10.0f, 20.0f));
-    auto ref = Entity::storage::make_entity(std::move(entity));
+    // Create an entity::Entity through the storage system
+    entity::Entity entity("test_entity",  world::Position(10.0f, 20.0f));
+    auto ref = entity::Entity::storage::make_entity(std::move(entity));
     
     // Access through reference
     EXPECT_EQ(ref->id, "test_entity");
@@ -30,35 +30,35 @@ TEST(EntityTest, ManagedReference) {
     EXPECT_FLOAT_EQ(ref->position.y, 20.0f);
 }
 
-// Test drive creation
+// Test npc::Drive creation
 TEST(DriveTest, CreateDrive) {
-    // Create a drive with type and intensity
-    Drive hunger(drive::Sustenance{}, 75.0f);
+    // Create a npc::Drive with type and intensity
+    npc::Drive hunger(npc::drive::Sustenance{}, 75.0f);
     
     // Check fields
     EXPECT_FLOAT_EQ(hunger.intensity, 75.0f);
-    EXPECT_TRUE(std::holds_alternative<drive::Sustenance>(hunger.type));
+    EXPECT_TRUE(std::holds_alternative<npc::drive::Sustenance>(hunger.type));
 }
 
 // Test NPC creation
 TEST(NPCTest, CreateNPC) {
     // Create components
-    Entity entity("test_npc", Position(15.0f, 25.0f));
-    auto entity_ref = Entity::storage::make_entity(std::move(entity));
+    entity::Entity entity("test_npc",  world::Position(15.0f, 25.0f));
+    auto entity_ref = entity::Entity::storage::make_entity(std::move(entity));
     
-    NPCIdentity identity(entity_ref);
-    auto identity_ref = NPCIdentity::storage::make_entity(std::move(identity));
+    npc::NPCIdentity identity(entity_ref);
+    auto identity_ref = npc::NPCIdentity::storage::make_entity(std::move(identity));
     
-    std::vector<Drive> drives = {
-        Drive(drive::Sustenance{}, 50.0f),
-        Drive(drive::Curiosity{}, 60.0f)
+    std::vector<npc::Drive> drives = {
+        npc::Drive(npc::drive::Sustenance{}, 50.0f),
+        npc::Drive(npc::drive::Curiosity{}, 60.0f)
     };
     
-    PerceptionBuffer buffer({});
-    auto perception = PerceptionBuffer::storage::make_entity(std::move(buffer));
+    memory::PerceptionBuffer buffer({});
+    auto perception = memory::PerceptionBuffer::storage::make_entity(std::move(buffer));
     
     // Create NPC
-    NPC npc(
+    npc::NPC npc(
         identity_ref,
         drives,
         perception,
@@ -70,8 +70,8 @@ TEST(NPCTest, CreateNPC) {
     // Check fields
     EXPECT_EQ(npc.identity->entity->id, "test_npc");
     EXPECT_EQ(npc.drives.size(), 2);
-    EXPECT_TRUE(std::holds_alternative<drive::Sustenance>(npc.drives[0].type));
-    EXPECT_TRUE(std::holds_alternative<drive::Curiosity>(npc.drives[1].type));
+    EXPECT_TRUE(std::holds_alternative<npc::drive::Sustenance>(npc.drives[0].type));
+    EXPECT_TRUE(std::holds_alternative<npc::drive::Curiosity>(npc.drives[1].type));
     EXPECT_FLOAT_EQ(npc.drives[0].intensity, 50.0f);
     EXPECT_FLOAT_EQ(npc.drives[1].intensity, 60.0f);
     EXPECT_TRUE(npc.perception->recent_perceptions.empty());

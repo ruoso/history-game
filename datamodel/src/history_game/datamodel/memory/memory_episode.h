@@ -8,7 +8,7 @@
 #include <history_game/datamodel/action/action_sequence.h>
 #include <history_game/datamodel/npc/drive.h>
 
-namespace history_game {
+namespace history_game::datamodel::memory {
 
 /**
  * Represents the impact of an action sequence on an NPC's emotional drives
@@ -19,10 +19,10 @@ struct MemoryEpisode {
   const uint64_t end_time;
   
   // Reference to the action sequence that created this episode
-  const ActionSequence::ref_type action_sequence;
+  const action::ActionSequence::ref_type action_sequence;
   
   // Impact on each drive
-  const std::vector<Drive> drive_impacts;
+  const std::vector<npc::Drive> drive_impacts;
   
   // How many times this has been repeated
   const uint32_t repetition_count;
@@ -31,8 +31,8 @@ struct MemoryEpisode {
   MemoryEpisode(
     uint64_t start,
     uint64_t end,
-    const ActionSequence::ref_type& sequence,
-    std::vector<Drive> impacts,
+    const action::ActionSequence::ref_type& sequence,
+    std::vector<npc::Drive> impacts,
     uint32_t repetitions = 1
   ) : start_time(start),
       end_time(end),
@@ -45,6 +45,6 @@ struct MemoryEpisode {
   using ref_type = storage::ref_type;
 };
 
-} // namespace history_game
+} // namespace history_game::datamodel::memory
 
 #endif // HISTORY_GAME_DATAMODEL_MEMORY_MEMORY_EPISODE_H

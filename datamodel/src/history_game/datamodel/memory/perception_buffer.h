@@ -6,7 +6,7 @@
 #include <cpioo/managed_entity.hpp>
 #include <history_game/datamodel/memory/memory_entry.h>
 
-namespace history_game {
+namespace history_game::datamodel::memory {
 
 /**
  * Short-term buffer of recent observations and actions

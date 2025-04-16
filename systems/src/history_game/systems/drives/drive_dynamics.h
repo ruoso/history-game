@@ -8,7 +8,7 @@
 #include <history_game/datamodel/npc/drive.h>
 #include <history_game/systems/drives/drive_impact.h>
 
-namespace history_game {
+namespace history_game::systems::drives {
 
 /**
  * Parameters controlling how drives change over time

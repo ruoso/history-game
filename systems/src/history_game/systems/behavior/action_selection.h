@@ -15,33 +15,33 @@
 #include <history_game/systems/drives/drive_impact.h>
 #include <history_game/datamodel/object/object.h>
 
-namespace history_game {
+namespace history_game::systems::behavior {
 
 /**
  * Represents a possible action that an NPC could take, with its potential targets
  */
 struct ActionOption {
   // The action type
-  const ActionType action;
+  const datamodel::action::ActionType action;
   
   // Possible targets for the action (if any)
-  const std::optional<Entity::ref_type> target_entity;
+  const std::optional<datamodel::entity::Entity::ref_type> target_entity;
   
   // Possible object target for the action (if any)
-  const std::optional<WorldObject::ref_type> target_object;
+  const std::optional<datamodel::object::WorldObject::ref_type> target_object;
   
   // The expected drive impacts from performing this action
-  const std::vector<Drive> expected_impacts;
+  const std::vector<datamodel::npc::Drive> expected_impacts;
   
   // Whether this action is from episodic memory or primitive heuristics
   const bool from_memory;
   
   // Constructor for action targeting an entity
-  template<ActionTypeConcept T>
+  template<datamodel::action::ActionTypeConcept T>
   ActionOption(
     T action_type,
-    const Entity::ref_type& entity,
-    std::vector<Drive> impacts,
+    const datamodel::entity::Entity::ref_type& entity,
+    std::vector<datamodel::npc::Drive> impacts,
     bool is_from_memory = false
   ) : action(action_type),
       target_entity(entity),
@@ -50,11 +50,11 @@ struct ActionOption {
       from_memory(is_from_memory) {}
       
   // Constructor for action targeting an object
-  template<ActionTypeConcept T>
+  template<datamodel::action::ActionTypeConcept T>
   ActionOption(
     T action_type,
-    const WorldObject::ref_type& object,
-    std::vector<Drive> impacts,
+    const datamodel::object::WorldObject::ref_type& object,
+    std::vector<datamodel::npc::Drive> impacts,
     bool is_from_memory = false
   ) : action(action_type),
       target_entity(std::nullopt),
@@ -63,10 +63,10 @@ struct ActionOption {
       from_memory(is_from_memory) {}
       
   // Constructor for action without a target
-  template<ActionTypeConcept T>
+  template<datamodel::action::ActionTypeConcept T>
   ActionOption(
     T action_type,
-    std::vector<Drive> impacts,
+    std::vector<datamodel::npc::Drive> impacts,
     bool is_from_memory = false
   ) : action(action_type),
       target_entity(std::nullopt),
@@ -80,7 +80,7 @@ struct ActionOption {
  */
 struct ActionSelectionCriteria {
   // The NPC's current drives that need to be addressed
-  const std::vector<Drive>& current_drives;
+  const std::vector<datamodel::npc::Drive>& current_drives;
   
   // Preference for familiar actions vs. novel actions (0.0-1.0)
   const float familiarity_preference;
@@ -93,7 +93,7 @@ struct ActionSelectionCriteria {
   
   // Constructor
   ActionSelectionCriteria(
-    const std::vector<Drive>& drives,
+    const std::vector<datamodel::npc::Drive>& drives,
     float f_pref = 0.5f,
     float s_pref = 0.5f,
     float rand = 0.2f
@@ -106,7 +106,7 @@ struct ActionSelectionCriteria {
 namespace action_selection_system {
 
   // Helper function to get action type name for logging
-  inline std::string get_action_name(const ActionType& action) {
+  inline std::string get_action_name(const datamodel::action::ActionType& action) {
     return std::visit([](const auto& a) -> std::string { return a.name; }, action);
   }
 
@@ -115,7 +115,7 @@ namespace action_selection_system {
    */
   inline float calculateDriveScore(
     const ActionOption& option,
-    const std::vector<Drive>& current_drives
+    const std::vector<datamodel::npc::Drive>& current_drives
   ) {
     float total_score = 0.0f;
     
@@ -129,7 +129,7 @@ namespace action_selection_system {
       // Find any impacts that affect this drive
       for (const auto& impact : option.expected_impacts) {
         // Check if the impact addresses this drive
-        if (drive_impact_system::areSameDriveTypes(drive.type, impact.type)) {
+        if (drives::drive_impact_system::areSameDriveTypes(drive.type, impact.type)) {
           // Higher drive intensity and stronger impact give higher score
           // Negative impact intensity means drive reduction
           float drive_reduction = -impact.intensity * drive.intensity;
@@ -167,8 +167,8 @@ namespace action_selection_system {
    * Generate possible actions based on primitive drives (for bootstrapping behavior)
    */
   inline std::vector<ActionOption> generatePrimitiveActions(
-    const NPC::ref_type& npc,
-    const World::ref_type& world
+    const datamodel::npc::NPC::ref_type& npc,
+    const datamodel::world::World::ref_type& world
   ) {
     std::vector<ActionOption> options;
     const auto& npc_position = npc->identity->entity->position;
@@ -190,17 +190,17 @@ namespace action_selection_system {
       if (distance <= 10.0f) {
         // For Belonging drive: Follow
         options.emplace_back(
-          action_type::Follow{},
+          datamodel::action::action_type::Follow{},
           other_npc->identity->entity,
-          std::vector<Drive>{Drive(drive::Belonging{}, -0.3f)},
+          std::vector<datamodel::npc::Drive>{datamodel::npc::Drive(datamodel::npc::drive::Belonging{}, -0.3f)},
           false
         );
         
         // For Curiosity drive: Observe
         options.emplace_back(
-          action_type::Observe{},
+          datamodel::action::action_type::Observe{},
           other_npc->identity->entity,
-          std::vector<Drive>{Drive(drive::Curiosity{}, -0.2f)},
+          std::vector<datamodel::npc::Drive>{datamodel::npc::Drive(datamodel::npc::drive::Curiosity{}, -0.2f)},
           false
         );
       }
@@ -218,9 +218,9 @@ namespace action_selection_system {
       if (distance <= 5.0f) {
         // For Curiosity drive: Observe object
         options.emplace_back(
-          action_type::Observe{},
+          datamodel::action::action_type::Observe{},
           object,
-          std::vector<Drive>{Drive(drive::Curiosity{}, -0.2f)},
+          std::vector<datamodel::npc::Drive>{datamodel::npc::Drive(datamodel::npc::drive::Curiosity{}, -0.2f)},
           false
         );
         
@@ -228,23 +228,23 @@ namespace action_selection_system {
         std::visit([&](const auto& category) {
           using CategoryType = std::decay_t<decltype(category)>;
           
-          if constexpr (std::is_same_v<CategoryType, object_category::Food>) {
+          if constexpr (std::is_same_v<CategoryType, datamodel::object::object_category::Food>) {
             // For Sustenance drive: Take food
             options.emplace_back(
-              action_type::Take{},
+              datamodel::action::action_type::Take{},
               object,
-              std::vector<Drive>{Drive(drive::Sustenance{}, -0.5f)},
+              std::vector<datamodel::npc::Drive>{datamodel::npc::Drive(datamodel::npc::drive::Sustenance{}, -0.5f)},
               false
             );
           }
-          else if constexpr (std::is_same_v<CategoryType, object_category::Structure>) {
+          else if constexpr (std::is_same_v<CategoryType, datamodel::object::object_category::Structure>) {
             // For Shelter drive: Rest in structure
             options.emplace_back(
-              action_type::Rest{},
+              datamodel::action::action_type::Rest{},
               object,
-              std::vector<Drive>{
-                Drive(drive::Shelter{}, -0.4f),
-                Drive(drive::Sustenance{}, -0.3f)
+              std::vector<datamodel::npc::Drive>{
+                datamodel::npc::Drive(datamodel::npc::drive::Shelter{}, -0.4f),
+                datamodel::npc::Drive(datamodel::npc::drive::Sustenance{}, -0.3f)
               },
               false
             );
@@ -257,25 +257,25 @@ namespace action_selection_system {
     
     // For Curiosity drive: Move
     options.emplace_back(
-      action_type::Move{},
-      std::vector<Drive>{Drive(drive::Curiosity{}, -0.2f)},
+      datamodel::action::action_type::Move{},
+      std::vector<datamodel::npc::Drive>{datamodel::npc::Drive(datamodel::npc::drive::Curiosity{}, -0.2f)},
       false
     );
     
     // For Shelter drive: Build
     options.emplace_back(
-      action_type::Build{},
-      std::vector<Drive>{
-        Drive(drive::Shelter{}, -0.3f),
-        Drive(drive::Pride{}, -0.2f)
+      datamodel::action::action_type::Build{},
+      std::vector<datamodel::npc::Drive>{
+        datamodel::npc::Drive(datamodel::npc::drive::Shelter{}, -0.3f),
+        datamodel::npc::Drive(datamodel::npc::drive::Pride{}, -0.2f)
       },
       false
     );
     
     // For Pride drive: Gesture
     options.emplace_back(
-      action_type::Gesture{},
-      std::vector<Drive>{Drive(drive::Pride{}, -0.3f)},
+      datamodel::action::action_type::Gesture{},
+      std::vector<datamodel::npc::Drive>{datamodel::npc::Drive(datamodel::npc::drive::Pride{}, -0.3f)},
       false
     );
     
@@ -286,8 +286,8 @@ namespace action_selection_system {
    * Generate possible actions from episodic memory
    */
   inline std::vector<ActionOption> generateMemoryBasedActions(
-    const NPC::ref_type& npc,
-    const World::ref_type& world
+    const datamodel::npc::NPC::ref_type& npc,
+    const datamodel::world::World::ref_type& world
   ) {
     std::vector<ActionOption> options;
     
@@ -307,9 +307,9 @@ namespace action_selection_system {
       const auto& memory = first_step.memory;
       
       // Use the action and targets from the memory
-      ActionType action = memory->action;
-      std::optional<Entity::ref_type> target_entity = memory->target_entity;
-      std::optional<WorldObject::ref_type> target_object = memory->target_object;
+      datamodel::action::ActionType action = memory->action;
+      std::optional<datamodel::entity::Entity::ref_type> target_entity = memory->target_entity;
+      std::optional<datamodel::object::WorldObject::ref_type> target_object = memory->target_object;
       
       // Check if targets still exist in the world
       bool targets_exist = true;
@@ -438,8 +438,8 @@ namespace action_selection_system {
   /**
    * Update an NPC's identity to reflect a new action
    */
-  inline NPCIdentity::ref_type updateIdentityWithAction(
-    const NPCIdentity::ref_type& identity,
+  inline datamodel::npc::NPCIdentity::ref_type updateIdentityWithAction(
+    const datamodel::npc::NPCIdentity::ref_type& identity,
     const ActionOption& selected_action
   ) {
     // Log the action being taken
@@ -460,29 +460,29 @@ namespace action_selection_system {
     // Create a new identity with the updated action
     if (selected_action.target_entity) {
       // Action targeting an entity
-      NPCIdentity updated_identity(
+      datamodel::npc::NPCIdentity updated_identity(
         identity->entity,
         selected_action.action,
         selected_action.target_entity.value()
       );
-      return NPCIdentity::storage::make_entity(std::move(updated_identity));
+      return datamodel::npc::NPCIdentity::storage::make_entity(std::move(updated_identity));
     }
     else if (selected_action.target_object) {
       // Action targeting an object
-      NPCIdentity updated_identity(
+      datamodel::npc::NPCIdentity updated_identity(
         identity->entity,
         selected_action.action,
         selected_action.target_object.value()
       );
-      return NPCIdentity::storage::make_entity(std::move(updated_identity));
+      return datamodel::npc::NPCIdentity::storage::make_entity(std::move(updated_identity));
     }
     else {
       // Untargeted action
-      NPCIdentity updated_identity(
+      datamodel::npc::NPCIdentity updated_identity(
         identity->entity,
         selected_action.action
       );
-      return NPCIdentity::storage::make_entity(std::move(updated_identity));
+      return datamodel::npc::NPCIdentity::storage::make_entity(std::move(updated_identity));
     }
   }
   
@@ -490,9 +490,9 @@ namespace action_selection_system {
    * The main function for selecting an NPC's next action
    * Returns an updated NPC with the new action
    */
-  inline NPC::ref_type selectNextAction(
-    const NPC::ref_type& npc,
-    const World::ref_type& world,
+  inline datamodel::npc::NPC::ref_type selectNextAction(
+    const datamodel::npc::NPC::ref_type& npc,
+    const datamodel::world::World::ref_type& world,
     const ActionSelectionCriteria& criteria
   ) {
     // Generate options from primitive drives
@@ -530,7 +530,7 @@ namespace action_selection_system {
     );
     
     // Create a new NPC with the updated identity
-    NPC updated_npc(
+    datamodel::npc::NPC updated_npc(
       updated_identity,
       npc->drives,
       npc->perception,
@@ -539,20 +539,20 @@ namespace action_selection_system {
       npc->relationships
     );
     
-    return NPC::storage::make_entity(std::move(updated_npc));
+    return datamodel::npc::NPC::storage::make_entity(std::move(updated_npc));
   }
   
   /**
    * Apply drive updates from taking an action
    * Returns an NPC with updated drive levels
    */
-  inline NPC::ref_type applyDriveUpdates(
-    const NPC::ref_type& npc,
+  inline datamodel::npc::NPC::ref_type applyDriveUpdates(
+    const datamodel::npc::NPC::ref_type& npc,
     const ActionOption& action,
     float action_effectiveness = 1.0f
   ) {
     // Create a new vector for updated drives
-    std::vector<Drive> updated_drives;
+    std::vector<datamodel::npc::Drive> updated_drives;
     updated_drives.reserve(npc->drives.size());
     
     // Track which drives have been updated
@@ -565,7 +565,7 @@ namespace action_selection_system {
       
       // Check if this drive has a matching impact
       for (const auto& impact : action.expected_impacts) {
-        if (drive_impact_system::areSameDriveTypes(drive.type, impact.type)) {
+        if (drives::drive_impact_system::areSameDriveTypes(drive.type, impact.type)) {
           // Apply the impact, scaled by effectiveness
           float new_intensity = drive.intensity + (impact.intensity * action_effectiveness);
           
@@ -588,7 +588,7 @@ namespace action_selection_system {
     
     
     // Create a new NPC with updated drives
-    NPC updated_npc(
+    datamodel::npc::NPC updated_npc(
       npc->identity,
       updated_drives,
       npc->perception,
@@ -597,11 +597,11 @@ namespace action_selection_system {
       npc->relationships
     );
     
-    return NPC::storage::make_entity(std::move(updated_npc));
+    return datamodel::npc::NPC::storage::make_entity(std::move(updated_npc));
   }
 
 } // namespace action_selection_system
 
-} // namespace history_game
+} // namespace history_game::systems::behavior
 
 #endif // HISTORY_GAME_SYSTEMS_BEHAVIOR_ACTION_SELECTION_H

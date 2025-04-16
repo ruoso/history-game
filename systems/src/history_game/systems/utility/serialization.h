@@ -11,8 +11,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
-namespace history_game {
-namespace serialization {
+namespace history_game::systems::utility {
 
 using json = nlohmann::json;
 
@@ -215,7 +214,6 @@ public:
     std::string getOutputPath() const;
 };
 
-} // namespace serialization
-} // namespace history_game
+} // namespace history_game::systems::utility
 
 #endif // HISTORY_GAME_SERIALIZATION_H

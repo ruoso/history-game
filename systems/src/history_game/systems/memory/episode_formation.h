@@ -12,9 +12,7 @@
 #include <history_game/datamodel/action/action_sequence.h>
 #include <history_game/systems/drives/drive_impact.h>
 
-namespace history_game {
-
-namespace episode_formation_system {
+namespace history_game::systems::memory {
 
   /**
    * Get action name for logging
@@ -368,7 +366,5 @@ namespace episode_formation_system {
   }
 
 } // namespace episode_formation_system
-
-} // namespace history_game
 
 #endif // HISTORY_GAME_SYSTEMS_MEMORY_EPISODE_FORMATION_H

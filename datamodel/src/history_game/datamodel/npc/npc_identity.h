@@ -8,11 +8,15 @@
 #include <history_game/datamodel/world/position.h>
 #include <history_game/datamodel/action/action_type.h>
 
-namespace history_game {
+namespace history_game::datamodel::object {
 
-// Forward declaration needed for the optional reference
 struct WorldObject;
-using WorldObjectRef = cpioo::managed_entity::reference<cpioo::managed_entity::storage<WorldObject, 10, uint32_t>>;
+
+}
+namespace history_game::datamodel::npc {
+
+  // Forward declaration needed for the optional reference
+  using WorldObjectRef = cpioo::managed_entity::reference<cpioo::managed_entity::storage<object::WorldObject, 10, uint32_t>>;
 
 /**
  * Basic identity information for an NPC
@@ -21,31 +25,31 @@ using WorldObjectRef = cpioo::managed_entity::reference<cpioo::managed_entity::s
  */
 struct NPCIdentity {
   // Reference to the base entity (contains ID and position)
-  const Entity::ref_type entity;
+  const entity::Entity::ref_type entity;
   
   // The action currently being performed
-  const std::optional<ActionType> current_action;
+  const std::optional<action::ActionType> current_action;
   
   // Target of the action, if any (entity reference to avoid circular refs)
-  const std::optional<Entity::ref_type> target_entity;
+  const std::optional<entity::Entity::ref_type> target_entity;
   
   // Object involved in the action, if any
   const std::optional<WorldObjectRef> target_object;
   
   // Constructor with no action
   NPCIdentity(
-    const Entity::ref_type& entity_ref
+    const entity::Entity::ref_type& entity_ref
   ) : entity(entity_ref),
       current_action(std::nullopt),
       target_entity(std::nullopt),
       target_object(std::nullopt) {}
   
   // Constructor with action targeting another entity
-  template<ActionTypeConcept T>
+  template<action::ActionTypeConcept T>
   NPCIdentity(
-    const Entity::ref_type& entity_ref,
+    const entity::Entity::ref_type& entity_ref,
     T action,
-    const Entity::ref_type& target
+    const entity::Entity::ref_type& target
   ) : entity(entity_ref),
       current_action(action),
       target_entity(target),
@@ -53,18 +57,18 @@ struct NPCIdentity {
       
   // Overload for ActionType variant with entity target
   NPCIdentity(
-    const Entity::ref_type& entity_ref,
-    const ActionType& action,
-    const Entity::ref_type& target
+    const entity::Entity::ref_type& entity_ref,
+    const action::ActionType& action,
+    const entity::Entity::ref_type& target
   ) : entity(entity_ref),
       current_action(action),
       target_entity(target),
       target_object(std::nullopt) {}
   
   // Constructor with action targeting object
-  template<ActionTypeConcept T>
+  template<action::ActionTypeConcept T>
   NPCIdentity(
-    const Entity::ref_type& entity_ref,
+    const entity::Entity::ref_type& entity_ref,
     T action,
     const WorldObjectRef& object
   ) : entity(entity_ref),
@@ -74,8 +78,8 @@ struct NPCIdentity {
   
   // Overload for ActionType variant with object target
   NPCIdentity(
-    const Entity::ref_type& entity_ref,
-    const ActionType& action,
+    const entity::Entity::ref_type& entity_ref,
+    const action::ActionType& action,
     const WorldObjectRef& object
   ) : entity(entity_ref),
       current_action(action),
@@ -83,9 +87,9 @@ struct NPCIdentity {
       target_object(object) {}
   
   // Constructor with untargeted action
-  template<ActionTypeConcept T>
+  template<action::ActionTypeConcept T>
   NPCIdentity(
-    const Entity::ref_type& entity_ref,
+    const entity::Entity::ref_type& entity_ref,
     T action
   ) : entity(entity_ref),
       current_action(action),
@@ -94,8 +98,8 @@ struct NPCIdentity {
       
   // Overload for ActionType variant with no target
   NPCIdentity(
-    const Entity::ref_type& entity_ref,
-    const ActionType& action
+    const entity::Entity::ref_type& entity_ref,
+    const action::ActionType& action
   ) : entity(entity_ref),
       current_action(action),
       target_entity(std::nullopt),
@@ -106,6 +110,6 @@ struct NPCIdentity {
   using ref_type = storage::ref_type;
 };
 
-} // namespace history_game
+} // namespace history_game::datamodel::npc
 
 #endif // HISTORY_GAME_DATAMODEL_NPC_NPC_IDENTITY_H

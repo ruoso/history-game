@@ -1,7 +1,7 @@
 #ifndef HISTORY_GAME_DATAMODEL_WORLD_POSITION_H
 #define HISTORY_GAME_DATAMODEL_WORLD_POSITION_H
 
-namespace history_game {
+namespace history_game::datamodel::world {
 
 /**
  * Position struct for spatial coordinates
@@ -15,6 +15,6 @@ struct Position {
   Position(float x_pos, float y_pos) : x(x_pos), y(y_pos) {}
 };
 
-} // namespace history_game
+} // namespace history_game::datamodel::world
 
 #endif // HISTORY_GAME_DATAMODEL_WORLD_POSITION_H

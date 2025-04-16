@@ -1,8 +1,7 @@
 #include <filesystem>
 #include <history_game/systems/utility/serialization.h>
 
-namespace history_game {
-namespace serialization {
+namespace history_game::systems::utility {
 
 /**
  * Get event type name using std::visit

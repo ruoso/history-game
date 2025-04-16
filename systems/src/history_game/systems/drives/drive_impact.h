@@ -14,24 +14,24 @@
 #include <history_game/datamodel/relationship/relationship_target.h>
 #include <history_game/datamodel/drives/action_context.h>
 
-namespace history_game {
+namespace history_game::systems::drives {
 
 namespace drive_impact_system {
   
   /**
    * Find any relationship the observer has with the action's actor
    */
-  inline std::optional<Relationship::ref_type> findActorRelationship(
-    const ActionContext& context
+  inline std::optional<datamodel::relationship::Relationship::ref_type> findActorRelationship(
+    const datamodel::drives::ActionContext& context
   ) {
     // Get the actor's identity from the memory
-    const NPCIdentity::ref_type& actor_identity = context.memory->actor;
+    const datamodel::npc::NPCIdentity::ref_type& actor_identity = context.memory->actor;
     
     // Get the actor's entity reference
-    const Entity::ref_type& actor_entity = actor_identity->entity;
+    const datamodel::entity::Entity::ref_type& actor_entity = actor_identity->entity;
     
     // Look for a relationship with this entity
-    return relationship_system::findRelationship(
+    return datamodel::relationship::relationship_system::findRelationship(
       context.observer->relationships, 
       actor_entity
     );
@@ -40,17 +40,17 @@ namespace drive_impact_system {
   /**
    * Find any relationship the observer has with the location of the action
    */
-  inline std::optional<Relationship::ref_type> findLocationRelationship(
-    const ActionContext& context
+  inline std::optional<datamodel::relationship::Relationship::ref_type> findLocationRelationship(
+    const datamodel::drives::ActionContext& context
   ) {
     // Get the memory's location where the action occurred
-    const Entity::ref_type& location_entity = 
+    const datamodel::entity::Entity::ref_type& location_entity = 
       context.memory->target_entity.value_or(context.memory->actor->entity);
     
-    const Position& action_position = location_entity->position;
+    const datamodel::world::Position& action_position = location_entity->position;
     
     // Look for a relationship with this location
-    return relationship_system::findLocationRelationship(
+    return datamodel::relationship::relationship_system::findLocationRelationship(
       context.observer->relationships,
       action_position
     );
@@ -59,8 +59,8 @@ namespace drive_impact_system {
   /**
    * Find any relationship the observer has with the object involved in the action
    */
-  inline std::optional<Relationship::ref_type> findObjectRelationship(
-    const ActionContext& context
+  inline std::optional<datamodel::relationship::Relationship::ref_type> findObjectRelationship(
+    const datamodel::drives::ActionContext& context
   ) {
     // Check if there's an object target
     if (!context.memory->target_object) {
@@ -68,10 +68,10 @@ namespace drive_impact_system {
     }
     
     // Get the object reference
-    const WorldObject::ref_type& target_object = context.memory->target_object.value();
+    const datamodel::object::WorldObject::ref_type& target_object = context.memory->target_object.value();
     
     // Look for a relationship with this object
-    return relationship_system::findRelationship(
+    return datamodel::relationship::relationship_system::findRelationship(
       context.observer->relationships,
       target_object
     );
@@ -80,7 +80,7 @@ namespace drive_impact_system {
   /**
    * Get the familiarity level for a relationship
    */
-  inline float getFamiliarity(const std::optional<Relationship::ref_type>& relationship) {
+  inline float getFamiliarity(const std::optional<datamodel::relationship::Relationship::ref_type>& relationship) {
     if (relationship) {
       return relationship.value()->familiarity;
     }
@@ -90,9 +90,9 @@ namespace drive_impact_system {
   /**
    * Get the affective trace for a specific drive from a relationship
    */
-  template<DriveTypeConcept T>
+  template<datamodel::npc::DriveTypeConcept T>
   inline float getAffectiveTrace(
-    const std::optional<Relationship::ref_type>& relationship,
+    const std::optional<datamodel::relationship::Relationship::ref_type>& relationship,
     const T& drive_type
   ) {
     if (!relationship) {
@@ -105,7 +105,7 @@ namespace drive_impact_system {
           using A = std::decay_t<decltype(a)>;
           using B = std::decay_t<decltype(b)>;
           return std::is_same_v<A, B>; 
-        }, trace.drive_type, DriveType{drive_type})) {
+        }, trace.drive_type, datamodel::npc::DriveType{drive_type})) {
         return trace.value;
       }
     }
@@ -113,14 +113,25 @@ namespace drive_impact_system {
     return 0.0f;
   }
   
+  /**
+   * Helper function to compare two drive types
+   */
+  inline bool areSameDriveTypes(const datamodel::npc::DriveType& a, const datamodel::npc::DriveType& b) {
+    return std::visit([](const auto& x, const auto& y) {
+      using X = std::decay_t<decltype(x)>;
+      using Y = std::decay_t<decltype(y)>;
+      return std::is_same_v<X, Y>;
+    }, a, b);
+  }
+  
   // Action-specific impact functions using ADL
   
   // Observe action impacts
-  inline std::vector<Drive> getActionImpacts(
-    const action_type::Observe&, 
-    const ActionContext& context
+  inline std::vector<datamodel::npc::Drive> getActionImpacts(
+    const datamodel::action::action_type::Observe&, 
+    const datamodel::drives::ActionContext& context
   ) {
-    std::vector<Drive> impacts;
+    std::vector<datamodel::npc::Drive> impacts;
     
     // Get relationships
     auto actor_rel = findActorRelationship(context);
@@ -138,17 +149,17 @@ namespace drive_impact_system {
     curiosity_impact *= (1.0f + familiarity_factor);
     
     // Add the impact
-    impacts.emplace_back(drive::Curiosity{}, curiosity_impact);
+    impacts.emplace_back(datamodel::npc::drive::Curiosity{}, curiosity_impact);
     
     return impacts;
   }
   
   // Follow action impacts
-  inline std::vector<Drive> getActionImpacts(
-    const action_type::Follow&, 
-    const ActionContext& context
+  inline std::vector<datamodel::npc::Drive> getActionImpacts(
+    const datamodel::action::action_type::Follow&, 
+    const datamodel::drives::ActionContext& context
   ) {
-    std::vector<Drive> impacts;
+    std::vector<datamodel::npc::Drive> impacts;
     
     // Get actor relationship
     auto actor_rel = findActorRelationship(context);
@@ -164,17 +175,17 @@ namespace drive_impact_system {
     belonging_impact *= (1.0f + familiarity_factor);
     
     // Add the impact
-    impacts.emplace_back(drive::Belonging{}, belonging_impact);
+    impacts.emplace_back(datamodel::npc::drive::Belonging{}, belonging_impact);
     
     return impacts;
   }
   
   // Rest action impacts
-  inline std::vector<Drive> getActionImpacts(
-    const action_type::Rest&, 
-    const ActionContext& context
+  inline std::vector<datamodel::npc::Drive> getActionImpacts(
+    const datamodel::action::action_type::Rest&, 
+    const datamodel::drives::ActionContext& context
   ) {
-    std::vector<Drive> impacts;
+    std::vector<datamodel::npc::Drive> impacts;
     
     // Get location relationship
     auto location_rel = findLocationRelationship(context);
@@ -190,11 +201,11 @@ namespace drive_impact_system {
     sustenance_impact *= (1.0f + familiarity_factor);
     
     // Add the sustenance impact
-    impacts.emplace_back(drive::Sustenance{}, sustenance_impact);
+    impacts.emplace_back(datamodel::npc::drive::Sustenance{}, sustenance_impact);
     
     // Familiar locations also provide shelter satisfaction
     if (location_familiarity > 0.3f) {
-      impacts.emplace_back(drive::Shelter{}, -0.2f * location_familiarity);
+      impacts.emplace_back(datamodel::npc::drive::Shelter{}, -0.2f * location_familiarity);
     }
     
     return impacts;
@@ -202,33 +213,22 @@ namespace drive_impact_system {
   
   // Default handler for actions without specific implementations
   template<typename T>
-  inline std::vector<Drive> getActionImpacts(
+  inline std::vector<datamodel::npc::Drive> getActionImpacts(
     const T&, 
-    const ActionContext& context
+    const datamodel::drives::ActionContext& context
   ) {
     // Default implementation returns empty impacts
     return {};
   }
   
   /**
-   * Helper function to compare two drive types
-   */
-  inline bool areSameDriveTypes(const DriveType& a, const DriveType& b) {
-    return std::visit([](const auto& x, const auto& y) {
-      using X = std::decay_t<decltype(x)>;
-      using Y = std::decay_t<decltype(y)>;
-      return std::is_same_v<X, Y>;
-    }, a, b);
-  }
-  
-  /**
    * Adjust impacts based on current drive levels
    */
-  inline std::vector<Drive> adjustImpacts(
-    const std::vector<Drive>& impacts,
-    const std::vector<Drive>& current_drives
+  inline std::vector<datamodel::npc::Drive> adjustImpacts(
+    const std::vector<datamodel::npc::Drive>& impacts,
+    const std::vector<datamodel::npc::Drive>& current_drives
   ) {
-    std::vector<Drive> adjusted_impacts;
+    std::vector<datamodel::npc::Drive> adjusted_impacts;
     adjusted_impacts.reserve(impacts.size());
     
     for (const auto& impact : impacts) {
@@ -259,9 +259,9 @@ namespace drive_impact_system {
    * Evaluate how an observation impacts the observer's drives
    * using std::visit and argument-dependent lookup
    */
-  inline std::vector<Drive> evaluateImpact(const ActionContext& context) {
+  inline std::vector<datamodel::npc::Drive> evaluateImpact(const datamodel::drives::ActionContext& context) {
     // Get base impacts using std::visit with ADL
-    std::vector<Drive> base_impacts = std::visit(
+    std::vector<datamodel::npc::Drive> base_impacts = std::visit(
       [&context](const auto& action_type) {
         return getActionImpacts(action_type, context);
       },
@@ -277,7 +277,7 @@ namespace drive_impact_system {
    * (i.e., is worth remembering as an episode)
    */
   inline bool hasEmotionalSignificance(
-    const std::vector<std::vector<Drive>>& impacts,
+    const std::vector<std::vector<datamodel::npc::Drive>>& impacts,
     float significance_threshold = 0.5f
   ) {
     // Sum the total magnitude of impacts
@@ -303,6 +303,6 @@ namespace drive_impact_system {
 
 } // namespace drive_impact_system
 
-} // namespace history_game
+} // namespace history_game::systems::drives
 
 #endif // HISTORY_GAME_SYSTEMS_DRIVES_DRIVE_IMPACT_H

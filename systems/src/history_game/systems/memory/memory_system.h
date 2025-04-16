@@ -13,9 +13,7 @@
 #include <history_game/systems/perception/perception_system.h>
 #include <history_game/datamodel/action/action_type.h>
 
-namespace history_game {
-
-namespace memory_system {
+namespace history_game::systems::memory {
 
   /**
    * Get the NPCIdentity from an NPC
@@ -234,7 +232,5 @@ namespace memory_system {
   }
 
 } // namespace memory_system
-
-} // namespace history_game
 
 #endif // HISTORY_GAME_SYSTEMS_MEMORY_MEMORY_SYSTEM_H

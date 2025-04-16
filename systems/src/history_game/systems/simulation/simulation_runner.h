@@ -11,12 +11,10 @@
 #include <history_game/systems/utility/serialization.h>
 #include <history_game/systems/action/action_execution.h>
 
-namespace history_game {
+namespace history_game::systems::simulation {
 
-// Use serialization's JSON type definition
-using json = serialization::json;
-
-namespace simulation_runner_system {
+  // Use serialization's JSON type definition
+  using json = serialization::json;
 
   /**
    * Advance the simulation clock by one tick
@@ -267,7 +265,5 @@ namespace simulation_runner_system {
   }
 
 } // namespace simulation_runner_system
-
-} // namespace history_game
 
 #endif // HISTORY_GAME_SIMULATION_RUNNER_H
