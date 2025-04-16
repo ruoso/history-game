@@ -20,7 +20,7 @@
 #include <history_game/systems/simulation/simulation_runner.h>
 #include <history_game/datamodel/memory/perception_buffer.h>
 
-using namespace history_game;
+namespace history_game::bin {
 
 // Helper to create a unique ID with a prefix
 std::string createId(const std::string& prefix) {
@@ -385,4 +385,10 @@ int main() {
     log_init::shutdown();
     
     return 0;
+}
+
+} // namespace history_game::bin
+
+int main() {
+    return history_game::bin::main();
 }

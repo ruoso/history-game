@@ -40,34 +40,11 @@ FetchContent_MakeAvailable(inside_out_objects spdlog json)
 enable_testing()
 include(GoogleTest)
 
-add_subdirectory(src)
-
-# Test executable for entity and related components
-add_executable(entity_test tests/entity_test.cpp)
-target_link_libraries(entity_test history_game_lib gtest gtest_main)
-gtest_discover_tests(entity_test)
-
-# Test executable for drive system
-add_executable(drive_test tests/drive_test.cpp)
-target_link_libraries(drive_test history_game_lib gtest gtest_main)
-gtest_discover_tests(drive_test)
-
-# Test executable for memory system
-add_executable(memory_test tests/memory_test.cpp)
-target_link_libraries(memory_test history_game_lib gtest gtest_main)
-gtest_discover_tests(memory_test)
-
-# Test serialization system
-add_executable(serialization_test tests/serialization_test.cpp)
-target_link_libraries(serialization_test history_game_lib gtest gtest_main)
-gtest_discover_tests(serialization_test)
-
-# Test inside-out objects integration
-add_executable(inside_out_test src/test_inside_out.cpp)
-target_link_libraries(inside_out_test history_game_lib gtest gtest_main)
-gtest_discover_tests(inside_out_test)
+add_subdirectory(datamodel)
+add_subdirectory(systems)
+add_subdirectory(bin)
 
 # Visualizer test data generator
 add_executable(generate_test_data visualizer/generate_test_data.cpp)
-target_link_libraries(generate_test_data history_game_lib nlohmann_json::nlohmann_json)
+target_link_libraries(generate_test_data history_game_datamodel history_game_systems nlohmann_json::nlohmann_json)
 
