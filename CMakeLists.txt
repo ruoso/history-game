@@ -40,19 +40,7 @@ FetchContent_MakeAvailable(inside_out_objects spdlog json)
 enable_testing()
 include(GoogleTest)
 
-# Create library target
-add_library(history_game_lib
-    src/utility/serialization.cpp
-)
-target_include_directories(history_game_lib PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${inside_out_objects_SOURCE_DIR}/include
-)
-target_link_libraries(history_game_lib PUBLIC spdlog::spdlog cpioo nlohmann_json::nlohmann_json)
-
-# Main executable
-add_executable(history_game src/main.cpp)
-target_link_libraries(history_game history_game_lib)
+add_subdirectory(src)
 
 # Test executable for entity and related components
 add_executable(entity_test tests/entity_test.cpp)
