@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_EPISODE_FORMATION_H
-#define HISTORY_GAME_EPISODE_FORMATION_H
+#ifndef HISTORY_GAME_SYSTEMS_MEMORY_EPISODE_FORMATION_H
+#define HISTORY_GAME_SYSTEMS_MEMORY_EPISODE_FORMATION_H
 
 #include <vector>
 #include <algorithm>
@@ -371,4 +371,4 @@ namespace episode_formation_system {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_EPISODE_FORMATION_H
+#endif // HISTORY_GAME_SYSTEMS_MEMORY_EPISODE_FORMATION_H

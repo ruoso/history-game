@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_ACTION_TYPE_H
-#define HISTORY_GAME_ACTION_TYPE_H
+#ifndef HISTORY_GAME_DATAMODEL_ACTION_ACTION_TYPE_H
+#define HISTORY_GAME_DATAMODEL_ACTION_ACTION_TYPE_H
 
 #include <string>
 #include <string_view>
@@ -81,4 +81,4 @@ using ActionType = std::variant<
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_ACTION_TYPE_H
+#endif // HISTORY_GAME_DATAMODEL_ACTION_ACTION_TYPE_H

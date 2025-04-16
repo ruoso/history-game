@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_ACTION_EXECUTION_H
-#define HISTORY_GAME_ACTION_EXECUTION_H
+#ifndef HISTORY_GAME_SYSTEMS_ACTION_ACTION_EXECUTION_H
+#define HISTORY_GAME_SYSTEMS_ACTION_ACTION_EXECUTION_H
 
 #include <random>
 #include <spdlog/spdlog.h>
@@ -310,4 +310,4 @@ inline World::ref_type executeAllActions(
 } // namespace action_execution_system
 } // namespace history_game
 
-#endif // HISTORY_GAME_ACTION_EXECUTION_H
+#endif // HISTORY_GAME_SYSTEMS_ACTION_ACTION_EXECUTION_H

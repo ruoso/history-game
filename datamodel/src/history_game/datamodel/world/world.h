@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_WORLD_H
-#define HISTORY_GAME_WORLD_H
+#ifndef HISTORY_GAME_DATAMODEL_WORLD_WORLD_H
+#define HISTORY_GAME_DATAMODEL_WORLD_WORLD_H
 
 #include <vector>
 #include <unordered_map>
@@ -42,4 +42,4 @@ struct World {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_WORLD_H
+#endif // HISTORY_GAME_DATAMODEL_WORLD_WORLD_H

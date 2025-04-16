@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_LOG_INIT_H
-#define HISTORY_GAME_LOG_INIT_H
+#ifndef HISTORY_GAME_SYSTEMS_UTILITY_LOG_INIT_H
+#define HISTORY_GAME_SYSTEMS_UTILITY_LOG_INIT_H
 
 #include <string>
 #include <optional>

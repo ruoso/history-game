@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_OBJECT_H
-#define HISTORY_GAME_OBJECT_H
+#ifndef HISTORY_GAME_DATAMODEL_OBJECT_OBJECT_H
+#define HISTORY_GAME_DATAMODEL_OBJECT_OBJECT_H
 
 #include <string>
 #include <vector>
@@ -90,4 +90,4 @@ struct WorldObject {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_OBJECT_H
+#endif // HISTORY_GAME_DATAMODEL_OBJECT_OBJECT_H

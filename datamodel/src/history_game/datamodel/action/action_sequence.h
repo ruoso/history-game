@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_ACTION_SEQUENCE_H
-#define HISTORY_GAME_ACTION_SEQUENCE_H
+#ifndef HISTORY_GAME_DATAMODEL_ACTION_ACTION_SEQUENCE_H
+#define HISTORY_GAME_DATAMODEL_ACTION_ACTION_SEQUENCE_H
 
 #include <vector>
 #include <string>
@@ -51,4 +51,4 @@ struct ActionSequence {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_ACTION_SEQUENCE_H
+#endif // HISTORY_GAME_DATAMODEL_ACTION_ACTION_SEQUENCE_H

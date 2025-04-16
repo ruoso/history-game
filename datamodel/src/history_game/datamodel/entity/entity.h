@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_ENTITY_H
-#define HISTORY_GAME_ENTITY_H
+#ifndef HISTORY_GAME_DATAMODEL_ENTITY_ENTITY_H
+#define HISTORY_GAME_DATAMODEL_ENTITY_ENTITY_H
 
 #include <string>
 #include <cpioo/managed_entity.hpp>
@@ -26,4 +26,4 @@ struct Entity {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_ENTITY_H
+#endif // HISTORY_GAME_DATAMODEL_ENTITY_ENTITY_H

@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_ACTION_CONTEXT_H
-#define HISTORY_GAME_ACTION_CONTEXT_H
+#ifndef HISTORY_GAME_DATAMODEL_DRIVES_ACTION_CONTEXT_H
+#define HISTORY_GAME_DATAMODEL_DRIVES_ACTION_CONTEXT_H
 
 #include <vector>
 #include <string>
@@ -33,4 +33,4 @@ struct ActionContext {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_ACTION_CONTEXT_H
+#endif // HISTORY_GAME_DATAMODEL_DRIVES_ACTION_CONTEXT_H

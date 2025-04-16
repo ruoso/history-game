@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_DRIVE_H
-#define HISTORY_GAME_DRIVE_H
+#ifndef HISTORY_GAME_DATAMODEL_NPC_DRIVE_H
+#define HISTORY_GAME_DATAMODEL_NPC_DRIVE_H
 
 #include <string>
 #include <variant>
@@ -75,4 +75,4 @@ struct Drive {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_DRIVE_H
+#endif // HISTORY_GAME_DATAMODEL_NPC_DRIVE_H

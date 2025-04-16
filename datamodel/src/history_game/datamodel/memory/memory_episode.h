@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_MEMORY_EPISODE_H
-#define HISTORY_GAME_MEMORY_EPISODE_H
+#ifndef HISTORY_GAME_DATAMODEL_MEMORY_MEMORY_EPISODE_H
+#define HISTORY_GAME_DATAMODEL_MEMORY_MEMORY_EPISODE_H
 
 #include <cstdint>
 #include <vector>
@@ -47,4 +47,4 @@ struct MemoryEpisode {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_MEMORY_EPISODE_H
+#endif // HISTORY_GAME_DATAMODEL_MEMORY_MEMORY_EPISODE_H

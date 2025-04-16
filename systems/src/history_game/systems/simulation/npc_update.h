@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_NPC_UPDATE_H
-#define HISTORY_GAME_NPC_UPDATE_H
+#ifndef HISTORY_GAME_SYSTEMS_SIMULATION_NPC_UPDATE_H
+#define HISTORY_GAME_SYSTEMS_SIMULATION_NPC_UPDATE_H
 
 #include <vector>
 #include <spdlog/spdlog.h>
@@ -131,4 +131,4 @@ namespace npc_update_system {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_NPC_UPDATE_H
+#endif // HISTORY_GAME_SYSTEMS_SIMULATION_NPC_UPDATE_H

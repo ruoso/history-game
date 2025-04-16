@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_NPC_IDENTITY_H
-#define HISTORY_GAME_NPC_IDENTITY_H
+#ifndef HISTORY_GAME_DATAMODEL_NPC_NPC_IDENTITY_H
+#define HISTORY_GAME_DATAMODEL_NPC_NPC_IDENTITY_H
 
 #include <string>
 #include <optional>
@@ -108,4 +108,4 @@ struct NPCIdentity {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_NPC_IDENTITY_H
+#endif // HISTORY_GAME_DATAMODEL_NPC_NPC_IDENTITY_H

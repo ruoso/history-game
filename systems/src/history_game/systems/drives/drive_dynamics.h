@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_DRIVE_DYNAMICS_H
-#define HISTORY_GAME_DRIVE_DYNAMICS_H
+#ifndef HISTORY_GAME_SYSTEMS_DRIVES_DRIVE_DYNAMICS_H
+#define HISTORY_GAME_SYSTEMS_DRIVES_DRIVE_DYNAMICS_H
 
 #include <vector>
 #include <cmath>
@@ -136,4 +136,4 @@ namespace drive_dynamics_system {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_DRIVE_DYNAMICS_H
+#endif // HISTORY_GAME_SYSTEMS_DRIVES_DRIVE_DYNAMICS_H

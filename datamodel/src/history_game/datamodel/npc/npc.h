@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_NPC_H
-#define HISTORY_GAME_NPC_H
+#ifndef HISTORY_GAME_DATAMODEL_NPC_NPC_H
+#define HISTORY_GAME_DATAMODEL_NPC_NPC_H
 
 #include <vector>
 #include <string>
@@ -60,4 +60,4 @@ struct NPC {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_NPC_H
+#endif // HISTORY_GAME_DATAMODEL_NPC_NPC_H

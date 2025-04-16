@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_RELATIONSHIP_TARGET_H
-#define HISTORY_GAME_RELATIONSHIP_TARGET_H
+#ifndef HISTORY_GAME_DATAMODEL_RELATIONSHIP_RELATIONSHIP_TARGET_H
+#define HISTORY_GAME_DATAMODEL_RELATIONSHIP_RELATIONSHIP_TARGET_H
 
 #include <variant>
 #include <history_game/datamodel/entity/entity.h>
@@ -89,4 +89,4 @@ namespace relationship_target_system {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_RELATIONSHIP_TARGET_H
+#endif // HISTORY_GAME_DATAMODEL_RELATIONSHIP_RELATIONSHIP_TARGET_H

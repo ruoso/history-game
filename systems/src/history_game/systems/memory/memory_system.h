@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_MEMORY_SYSTEM_H
-#define HISTORY_GAME_MEMORY_SYSTEM_H
+#ifndef HISTORY_GAME_SYSTEMS_MEMORY_MEMORY_SYSTEM_H
+#define HISTORY_GAME_SYSTEMS_MEMORY_MEMORY_SYSTEM_H
 
 #include <vector>
 #include <string>
@@ -237,4 +237,4 @@ namespace memory_system {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_MEMORY_SYSTEM_H
+#endif // HISTORY_GAME_SYSTEMS_MEMORY_MEMORY_SYSTEM_H

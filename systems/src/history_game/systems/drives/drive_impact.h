@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_DRIVE_IMPACT_SYSTEM_H
-#define HISTORY_GAME_DRIVE_IMPACT_SYSTEM_H
+#ifndef HISTORY_GAME_SYSTEMS_DRIVES_DRIVE_IMPACT_H
+#define HISTORY_GAME_SYSTEMS_DRIVES_DRIVE_IMPACT_H
 
 #include <vector>
 #include <optional>
@@ -305,4 +305,4 @@ namespace drive_impact_system {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_DRIVE_IMPACT_SYSTEM_H
+#endif // HISTORY_GAME_SYSTEMS_DRIVES_DRIVE_IMPACT_H

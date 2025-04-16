@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_MEMORY_ENTRY_H
-#define HISTORY_GAME_MEMORY_ENTRY_H
+#ifndef HISTORY_GAME_DATAMODEL_MEMORY_MEMORY_ENTRY_H
+#define HISTORY_GAME_DATAMODEL_MEMORY_MEMORY_ENTRY_H
 
 #include <string>
 #include <cstdint>
@@ -77,4 +77,4 @@ struct MemoryEntry {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_MEMORY_ENTRY_H
+#endif // HISTORY_GAME_DATAMODEL_MEMORY_MEMORY_ENTRY_H

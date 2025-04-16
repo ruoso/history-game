@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_ACTION_SELECTION_H
-#define HISTORY_GAME_ACTION_SELECTION_H
+#ifndef HISTORY_GAME_SYSTEMS_BEHAVIOR_ACTION_SELECTION_H
+#define HISTORY_GAME_SYSTEMS_BEHAVIOR_ACTION_SELECTION_H
 
 #include <vector>
 #include <optional>
@@ -604,4 +604,4 @@ namespace action_selection_system {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_ACTION_SELECTION_H
+#endif // HISTORY_GAME_SYSTEMS_BEHAVIOR_ACTION_SELECTION_H

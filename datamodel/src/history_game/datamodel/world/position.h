@@ -1,5 +1,5 @@
-#ifndef HISTORY_GAME_POSITION_H
-#define HISTORY_GAME_POSITION_H
+#ifndef HISTORY_GAME_DATAMODEL_WORLD_POSITION_H
+#define HISTORY_GAME_DATAMODEL_WORLD_POSITION_H
 
 namespace history_game {
 
@@ -17,4 +17,4 @@ struct Position {
 
 } // namespace history_game
 
-#endif // HISTORY_GAME_POSITION_H
+#endif // HISTORY_GAME_DATAMODEL_WORLD_POSITION_H
