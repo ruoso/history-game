@@ -26,6 +26,6 @@ struct PerceptionBuffer {
   using ref_type = storage::ref_type;
 };
 
-} // namespace history_game
+} // namespace history_game::datamodel::memory
 
 #endif // HISTORY_GAME_DATAMODEL_MEMORY_PERCEPTION_BUFFER_H

@@ -14,13 +14,13 @@
 namespace history_game::systems::simulation {
 
   // Use serialization's JSON type definition
-  using json = serialization::json;
+  using json = utility::json;
 
   /**
    * Advance the simulation clock by one tick
    */
-  inline SimulationClock::ref_type advanceClock(
-    const SimulationClock::ref_type& clock
+  inline datamodel::world::SimulationClock::ref_type advanceClock(
+    const datamodel::world::SimulationClock::ref_type& clock
   ) {
     // Create a new clock with incremented tick
     uint64_t new_tick = clock->current_tick + 1;
@@ -35,7 +35,7 @@ namespace history_game::systems::simulation {
     }
     
     // Create a new clock
-    SimulationClock updated_clock(
+    datamodel::world::SimulationClock updated_clock(
       new_tick,
       new_generation,
       clock->ticks_per_generation
@@ -49,17 +49,17 @@ namespace history_game::systems::simulation {
       spdlog::debug("Simulation advanced to tick {}", new_tick);
     }
     
-    return SimulationClock::storage::make_entity(std::move(updated_clock));
+    return datamodel::world::SimulationClock::storage::make_entity(std::move(updated_clock));
   }
   
   /**
    * Process one complete simulation tick
    */
-  inline World::ref_type processTick(
-    const World::ref_type& world,
+  inline datamodel::world::World::ref_type processTick(
+    const datamodel::world::World::ref_type& world,
     const NPCUpdateParams& params,
     float perception_range = 10.0f,
-    serialization::SimulationLogger* logger = nullptr
+    utility::SimulationLogger* logger = nullptr
   ) {
     spdlog::info("Processing simulation tick {}", world->clock->current_tick);
     
@@ -68,7 +68,7 @@ namespace history_game::systems::simulation {
       uint64_t current_time = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
       
-      logger->logEvent(serialization::createTickStartEvent(
+      logger->logEvent(utility::createTickStartEvent(
         current_time, 
         world->clock->current_tick, 
         world->clock->current_generation
@@ -81,11 +81,11 @@ namespace history_game::systems::simulation {
 
     // 2. Execute NPC actions
     spdlog::debug("Executing NPC actions");
-    auto world_after_actions = action_execution_system::executeAllActions(world_with_actions, logger);
+    auto world_after_actions = action::executeAllActions(world_with_actions, logger);
     
     // 3. Process perceptions based on the new actions
     spdlog::debug("Processing perceptions (range: {:.2f})", perception_range);
-    auto world_with_perceptions = memory_system::processPerceptions(
+    auto world_with_perceptions = memory::processPerceptions(
       world_after_actions,
       perception_range
     );
@@ -94,13 +94,13 @@ namespace history_game::systems::simulation {
     auto updated_clock = advanceClock(world_with_perceptions->clock);
     
     // 4. Create a new world with the updated clock
-    World updated_world(
+    datamodel::world::World updated_world(
       updated_clock,
       world_with_perceptions->npcs,
       world_with_perceptions->objects
     );
     
-    auto result = World::storage::make_entity(std::move(updated_world));
+    auto result = datamodel::world::World::storage::make_entity(std::move(updated_world));
     
     // Log tick end event and entity positions if logger is provided
     if (logger && logger->isInitialized()) {
@@ -108,7 +108,7 @@ namespace history_game::systems::simulation {
         std::chrono::system_clock::now().time_since_epoch()).count();
       
       // Log tick end event
-      logger->logEvent(serialization::createTickEndEvent(
+      logger->logEvent(utility::createTickEndEvent(
         current_time, 
         world->clock->current_tick, 
         world->clock->current_generation,
@@ -133,7 +133,7 @@ namespace history_game::systems::simulation {
         json drives = json::array();
         for (const auto& drive : npc->drives) {
           json drive_json;
-          drive_json["type"] = drive_dynamics_system::get_drive_name(drive.type);
+          drive_json["type"] = drives::drive_dynamics_system::get_drive_name(drive.type);
           drive_json["value"] = drive.intensity;
           drives.push_back(drive_json);
         }
@@ -141,11 +141,11 @@ namespace history_game::systems::simulation {
         // Get current action if any
         std::optional<std::string> action;
         if (npc->identity->current_action) {
-          action = action_selection_system::get_action_name(npc->identity->current_action.value());
+          action = behavior::action_selection_system::get_action_name(npc->identity->current_action.value());
         }
         
         // Log entity update event
-        logger->logEvent(serialization::createEntityUpdateEvent(
+        logger->logEvent(utility::createEntityUpdateEvent(
           current_time, 
           npc->identity->entity->id, 
           "NPC", 
@@ -165,7 +165,7 @@ namespace history_game::systems::simulation {
         position["y"] = object->entity->position.y;
         
         // Log entity update event
-        logger->logEvent(serialization::createEntityUpdateEvent(
+        logger->logEvent(utility::createEntityUpdateEvent(
           current_time, 
           object->entity->id, 
           "Object", 
@@ -190,17 +190,17 @@ namespace history_game::systems::simulation {
    * @return The final world state after all ticks
    */
   // Helper function to run a single tick
-  inline World::ref_type runTick(
-    const World::ref_type& world,
+  inline datamodel::world::World::ref_type runTick(
+    const datamodel::world::World::ref_type& world,
     const NPCUpdateParams& params,
     float perception_range,
     uint64_t tick_number,
     uint64_t total_ticks,
-    const std::function<void(const World::ref_type&, uint64_t)>& callback,
-    serialization::SimulationLogger* logger = nullptr
+    const std::function<void(const datamodel::world::World::ref_type&, uint64_t)>& callback,
+    utility::SimulationLogger* logger = nullptr
   ) {
     // Process one tick
-    World::ref_type next_world = processTick(world, params, perception_range, logger);
+    datamodel::world::World::ref_type next_world = processTick(world, params, perception_range, logger);
     
     // Call the callback if provided
     if (callback) {
@@ -217,22 +217,22 @@ namespace history_game::systems::simulation {
   }
 
   // Recursive implementation to avoid reassigning references
-  inline World::ref_type runSimulationRecursive(
-    const World::ref_type& world,
+  inline datamodel::world::World::ref_type runSimulationRecursive(
+    const datamodel::world::World::ref_type& world,
     uint64_t remaining_ticks,
     uint64_t total_ticks,
     uint64_t current_tick,
     const NPCUpdateParams& params,
     float perception_range,
-    const std::function<void(const World::ref_type&, uint64_t)>& callback,
-    serialization::SimulationLogger* logger = nullptr
+    const std::function<void(const datamodel::world::World::ref_type&, uint64_t)>& callback,
+    utility::SimulationLogger* logger = nullptr
   ) {
     if (remaining_ticks == 0) {
       return world;
     }
     
     // Process one tick
-    World::ref_type next_world = runTick(world, params, perception_range, 
+    datamodel::world::World::ref_type next_world = runTick(world, params, perception_range, 
                                         current_tick, total_ticks, callback, logger);
     
     // Process remaining ticks recursively
@@ -240,13 +240,13 @@ namespace history_game::systems::simulation {
                                 current_tick + 1, params, perception_range, callback, logger);
   }
 
-  inline World::ref_type runSimulation(
-    const World::ref_type& world,
+  inline datamodel::world::World::ref_type runSimulation(
+    const datamodel::world::World::ref_type& world,
     uint64_t ticks,
     const NPCUpdateParams& params,
     float perception_range = 10.0f,
-    serialization::SimulationLogger* logger = nullptr,
-    const std::function<void(const World::ref_type&, uint64_t)>& callback = nullptr
+    utility::SimulationLogger* logger = nullptr,
+    const std::function<void(const datamodel::world::World::ref_type&, uint64_t)>& callback = nullptr
   ) {
     spdlog::info("Starting simulation for {} ticks (initial tick: {})", 
                 ticks, world->clock->current_tick);
@@ -254,7 +254,7 @@ namespace history_game::systems::simulation {
                 world->npcs.size(), world->objects.size());
     
     // Use recursion to avoid reassigning references
-    World::ref_type final_world = runSimulationRecursive(world, ticks, ticks, 1, 
+    datamodel::world::World::ref_type final_world = runSimulationRecursive(world, ticks, ticks, 1, 
                                                         params, perception_range, callback, logger);
     
     spdlog::info("Simulation complete - final tick: {}, generation: {}", 
@@ -264,6 +264,6 @@ namespace history_game::systems::simulation {
     return final_world;
   }
 
-} // namespace simulation_runner_system
+} // namespace history_game::systems::simulation
 
-#endif // HISTORY_GAME_SIMULATION_RUNNER_H
+#endif // HISTORY_GAME_SYSTEMS_SIMULATION_SIMULATION_RUNNER_H

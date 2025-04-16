@@ -17,14 +17,14 @@ namespace history_game::systems::memory {
   /**
    * Get action name for logging
    */
-  inline std::string get_action_name(const ActionType& action) {
+  inline std::string get_action_name(const datamodel::action::ActionType& action) {
     return std::visit([](const auto& a) -> std::string { return a.name; }, action);
   }
   
   /**
    * Get drive name for logging
    */
-  inline std::string get_drive_name(const DriveType& drive) {
+  inline std::string get_drive_name(const datamodel::npc::DriveType& drive) {
     return std::visit([](const auto& d) -> std::string { return d.name; }, drive);
   }
 
@@ -34,12 +34,12 @@ namespace history_game::systems::memory {
    * 
    * @return A vector of vectors, where each inner vector is a potential sequence
    */
-  inline std::vector<std::vector<MemoryEntry::ref_type>> identifyActionSequences(
-    const PerceptionBuffer::ref_type& buffer,
+  inline std::vector<std::vector<datamodel::memory::MemoryEntry::ref_type>> identifyActionSequences(
+    const datamodel::memory::PerceptionBuffer::ref_type& buffer,
     uint64_t max_sequence_gap = 5,  // Maximum ticks between related actions
     size_t min_sequence_length = 2  // Minimum actions to form a sequence
   ) {
-    std::vector<std::vector<MemoryEntry::ref_type>> sequences;
+    std::vector<std::vector<datamodel::memory::MemoryEntry::ref_type>> sequences;
     
     // Create a vector of indices that we can sort instead of the references directly
     std::vector<size_t> indices(buffer->recent_perceptions.size());
@@ -54,14 +54,14 @@ namespace history_game::systems::memory {
       });
       
     // Create a sorted vector using the indices
-    std::vector<MemoryEntry::ref_type> sorted_perceptions;
+    std::vector<datamodel::memory::MemoryEntry::ref_type> sorted_perceptions;
     sorted_perceptions.reserve(buffer->recent_perceptions.size());
     for (size_t idx : indices) {
       sorted_perceptions.push_back(buffer->recent_perceptions[idx]);
     }
     
     // Initialize with an empty sequence
-    std::vector<MemoryEntry::ref_type> current_sequence;
+    std::vector<datamodel::memory::MemoryEntry::ref_type> current_sequence;
     
     // Process each perception in order
     for (const auto& perception : sorted_perceptions) {
@@ -100,11 +100,11 @@ namespace history_game::systems::memory {
   /**
    * Create an ActionSequence from a list of memory entries
    */
-  inline ActionSequence::ref_type createActionSequence(
-    const std::vector<MemoryEntry::ref_type>& entries,
+  inline datamodel::action::ActionSequence::ref_type createActionSequence(
+    const std::vector<datamodel::memory::MemoryEntry::ref_type>& entries,
     const std::string& sequence_id
   ) {
-    std::vector<ActionStep> steps;
+    std::vector<datamodel::action::ActionStep> steps;
     steps.reserve(entries.size());
     
     // Add the first step with zero delay
@@ -117,39 +117,39 @@ namespace history_game::systems::memory {
     }
     
     // Create the action sequence
-    ActionSequence sequence(sequence_id, std::move(steps));
-    return ActionSequence::storage::make_entity(std::move(sequence));
+    datamodel::action::ActionSequence sequence(sequence_id, std::move(steps));
+    return datamodel::action::ActionSequence::storage::make_entity(std::move(sequence));
   }
   
   /**
    * Evaluate the emotional impact of a sequence of memory entries
    */
-  inline std::vector<Drive> evaluateSequenceImpact(
-    const NPC::ref_type& npc,
-    const std::vector<MemoryEntry::ref_type>& sequence,
+  inline std::vector<datamodel::npc::Drive> evaluateSequenceImpact(
+    const datamodel::npc::NPC::ref_type& npc,
+    const std::vector<datamodel::memory::MemoryEntry::ref_type>& sequence,
     uint64_t current_time
   ) {
     // Calculate individual impacts for each memory in the sequence
-    std::vector<std::vector<Drive>> all_impacts;
+    std::vector<std::vector<datamodel::npc::Drive>> all_impacts;
     
     for (const auto& memory : sequence) {
-      ActionContext context(npc, memory, current_time);
-      all_impacts.push_back(drive_impact_system::evaluateImpact(context));
+      datamodel::drives::ActionContext context(npc, memory, current_time);
+      all_impacts.push_back(drives::drive_impact_system::evaluateImpact(context));
     }
     
     // Combine all impacts into a single vector
-    std::vector<Drive> combined_impacts;
+    std::vector<datamodel::npc::Drive> combined_impacts;
     
     // Track which drive types we've already processed
-    std::vector<DriveType> processed_types;
+    std::vector<datamodel::npc::DriveType> processed_types;
     
     // For each impact set
     for (const auto& impacts : all_impacts) {
       for (const auto& impact : impacts) {
         // Check if we've already seen this drive type
         auto it = std::find_if(processed_types.begin(), processed_types.end(),
-          [&impact](const DriveType& type) {
-            return drive_impact_system::areSameDriveTypes(type, impact.type);
+          [&impact](const datamodel::npc::DriveType& type) {
+            return drives::drive_impact_system::areSameDriveTypes(type, impact.type);
           });
         
         if (it == processed_types.end()) {
@@ -159,12 +159,12 @@ namespace history_game::systems::memory {
         } else {
           // We've seen this drive type before, find it in combined impacts and add to it
           for (auto& combined_impact : combined_impacts) {
-            if (drive_impact_system::areSameDriveTypes(combined_impact.type, impact.type)) {
+            if (drives::drive_impact_system::areSameDriveTypes(combined_impact.type, impact.type)) {
               // Add the impacts (effectively averaging them, but with weight toward stronger impacts)
               float new_intensity = (combined_impact.intensity + impact.intensity) * 0.6f;
               
               // Create a new vector with the updated impact
-              std::vector<Drive> new_impacts;
+              std::vector<datamodel::npc::Drive> new_impacts;
               new_impacts.reserve(combined_impacts.size());
               
               for (size_t i = 0; i < combined_impacts.size(); ++i) {
@@ -192,9 +192,9 @@ namespace history_game::systems::memory {
   /**
    * Create a memory episode from a sequence of observations
    */
-  inline MemoryEpisode::ref_type createMemoryEpisode(
-    const std::vector<MemoryEntry::ref_type>& sequence,
-    const std::vector<Drive>& impacts,
+  inline datamodel::memory::MemoryEpisode::ref_type createMemoryEpisode(
+    const std::vector<datamodel::memory::MemoryEntry::ref_type>& sequence,
+    const std::vector<datamodel::npc::Drive>& impacts,
     const std::string& sequence_id,
     uint32_t repetition_count = 1
   ) {
@@ -217,7 +217,7 @@ namespace history_game::systems::memory {
     auto action_sequence = createActionSequence(sequence, sequence_id);
     
     // Create the memory episode
-    MemoryEpisode episode(
+    datamodel::memory::MemoryEpisode episode(
       start_time,
       end_time,
       action_sequence,
@@ -225,16 +225,16 @@ namespace history_game::systems::memory {
       repetition_count
     );
     
-    return MemoryEpisode::storage::make_entity(std::move(episode));
+    return datamodel::memory::MemoryEpisode::storage::make_entity(std::move(episode));
   }
   
   /**
    * Find similar episodes in an NPC's memory
    * Returns a matching episode if found, or nullptr if no match
    */
-  inline MemoryEpisode::ref_type findSimilarEpisode(
-    const std::vector<MemoryEpisode::ref_type>& episodes,
-    const ActionSequence::ref_type& sequence,
+  inline datamodel::memory::MemoryEpisode::ref_type findSimilarEpisode(
+    const std::vector<datamodel::memory::MemoryEpisode::ref_type>& episodes,
+    const datamodel::action::ActionSequence::ref_type& sequence,
     float similarity_threshold = 0.7f
   ) {
     // For now, a simple implementation that just checks if the sequences have the same number of steps
@@ -258,20 +258,20 @@ namespace history_game::systems::memory {
     
     // If no episodes exist, create a dummy sequence and episode that we'll never use
     // First create an empty action sequence with a special ID
-    ActionSequence dummy_sequence("__dummy__", {});
-    auto dummy_sequence_ref = ActionSequence::storage::make_entity(std::move(dummy_sequence));
+    datamodel::action::ActionSequence dummy_sequence("__dummy__", {});
+    auto dummy_sequence_ref = datamodel::action::ActionSequence::storage::make_entity(std::move(dummy_sequence));
     
     // Now create a dummy episode with the sequence and special repetition_count of 0
-    MemoryEpisode dummy(0, 0, dummy_sequence_ref, {}, 0);
-    return MemoryEpisode::storage::make_entity(std::move(dummy));
+    datamodel::memory::MemoryEpisode dummy(0, 0, dummy_sequence_ref, {}, 0);
+    return datamodel::memory::MemoryEpisode::storage::make_entity(std::move(dummy));
   }
   
   /**
    * Process an NPC's perceptions to form new episodic memories
    * Returns an updated NPC with new or updated episodic memories
    */
-  inline NPC::ref_type formEpisodicMemories(
-    const NPC::ref_type& npc,
+  inline datamodel::npc::NPC::ref_type formEpisodicMemories(
+    const datamodel::npc::NPC::ref_type& npc,
     uint64_t current_time,
     float significance_threshold = 0.3f,
     uint64_t max_sequence_gap = 5,
@@ -290,7 +290,7 @@ namespace history_game::systems::memory {
     }
     
     // New episodes to add
-    std::vector<MemoryEpisode::ref_type> new_episodes;
+    std::vector<datamodel::memory::MemoryEpisode::ref_type> new_episodes;
     
     // Process each potential sequence
     for (const auto& sequence : sequences) {
@@ -298,7 +298,7 @@ namespace history_game::systems::memory {
       auto impacts = evaluateSequenceImpact(npc, sequence, current_time);
       
       // Check if it has enough emotional significance
-      if (drive_impact_system::hasEmotionalSignificance({impacts}, significance_threshold)) {
+      if (drives::drive_impact_system::hasEmotionalSignificance({impacts}, significance_threshold)) {
         // Create a unique ID for this sequence
         std::string sequence_id = "seq_" + std::to_string(current_time) + "_" + 
                                    std::to_string(sequence.size());
@@ -313,7 +313,7 @@ namespace history_game::systems::memory {
         // The dummy one we return has repetition_count of 0, which is never valid for a real episode
         if (similar_episode->repetition_count > 0) {
           // Update the existing episode with a higher repetition count
-          MemoryEpisode updated_episode(
+          datamodel::memory::MemoryEpisode updated_episode(
             similar_episode->start_time,
             similar_episode->end_time,
             similar_episode->action_sequence,
@@ -322,7 +322,7 @@ namespace history_game::systems::memory {
           );
           
           new_episodes.push_back(
-            MemoryEpisode::storage::make_entity(std::move(updated_episode))
+            datamodel::memory::MemoryEpisode::storage::make_entity(std::move(updated_episode))
           );
         } else {
           // This is a new type of episode
@@ -339,7 +339,7 @@ namespace history_game::systems::memory {
     }
     
     // Combine existing episodes with new ones
-    std::vector<MemoryEpisode::ref_type> updated_episodes;
+    std::vector<datamodel::memory::MemoryEpisode::ref_type> updated_episodes;
     updated_episodes.reserve(npc->episodic_memory.size() + new_episodes.size());
     
     // Copy existing episodes
@@ -353,7 +353,7 @@ namespace history_game::systems::memory {
     }
     
     // Create updated NPC with new episodic memories
-    NPC updated_npc(
+    datamodel::npc::NPC updated_npc(
       npc->identity,
       npc->drives,
       npc->perception,
@@ -362,9 +362,9 @@ namespace history_game::systems::memory {
       npc->relationships
     );
     
-    return NPC::storage::make_entity(std::move(updated_npc));
+    return datamodel::npc::NPC::storage::make_entity(std::move(updated_npc));
   }
 
-} // namespace episode_formation_system
+} // namespace history_game::systems::memory
 
 #endif // HISTORY_GAME_SYSTEMS_MEMORY_EPISODE_FORMATION_H

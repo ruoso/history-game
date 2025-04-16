@@ -4,7 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <history_game/systems/utility/serialization.h>
 
-using namespace history_game;
+using namespace history_game::systems;
 using json = nlohmann::json;
 
 // Test path for serialization output
@@ -43,7 +43,7 @@ protected:
 
 // Test logger initialization
 TEST_F(SerializationTest, LoggerInitialization) {
-    serialization::SimulationLogger logger;
+    utility::SimulationLogger logger;
     
     // Test initialization
     EXPECT_TRUE(logger.initialize(TEST_LOG_FILE));
@@ -57,7 +57,7 @@ TEST_F(SerializationTest, LoggerInitialization) {
 
 // Test tick events serialization
 TEST_F(SerializationTest, TickEvents) {
-    serialization::SimulationLogger logger;
+    utility::SimulationLogger logger;
     EXPECT_TRUE(logger.initialize(TEST_LOG_FILE));
     
     // Current time
@@ -65,7 +65,7 @@ TEST_F(SerializationTest, TickEvents) {
         std::chrono::system_clock::now().time_since_epoch()).count();
     
     // Log a tick start event
-    auto tick_start_event = serialization::createTickStartEvent(
+    auto tick_start_event = utility::createTickStartEvent(
         current_time, 
         1, // tick
         1  // generation
@@ -83,7 +83,7 @@ TEST_F(SerializationTest, TickEvents) {
     EXPECT_EQ(log_data.size(), 1);
     
     // Check event (tick start)
-    EXPECT_EQ(log_data[0]["type"], serialization::event_type::TickStart{}.name);
+    EXPECT_EQ(log_data[0]["type"], utility::event_type::TickStart{}.name);
     EXPECT_EQ(log_data[0]["tick_number"], 1);
     EXPECT_EQ(log_data[0]["generation"], 1);
 }

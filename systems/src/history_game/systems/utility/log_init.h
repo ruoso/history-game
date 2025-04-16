@@ -13,7 +13,7 @@ namespace history_game::systems::utility {
 /**
  * Initialize spdlog with simulation settings
  */
-inline void initialize(
+inline void log_initialize(
   const std::string& console_level = "info",
   const std::optional<std::string>& file_path = std::nullopt,
   const std::string& file_level = "trace"
@@ -52,7 +52,7 @@ inline void initialize(
 /**
  * Shutdown and flush all loggers
  */
-inline void shutdown() {
+inline void log_shutdown() {
   spdlog::info("Logging shutdown");
   spdlog::shutdown();
 }

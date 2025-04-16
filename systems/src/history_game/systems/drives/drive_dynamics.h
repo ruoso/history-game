@@ -21,13 +21,13 @@ struct DriveParameters {
   const float intensity_factor;
   
   // Different growth rates for each drive type
-  const std::vector<std::pair<DriveType, float>> drive_growth_modifiers;
+  const std::vector<std::pair<datamodel::npc::DriveType, float>> drive_growth_modifiers;
   
   // Constructor with default values
   DriveParameters(
     float growth_rate = 0.1f,
     float intensity = 0.5f,
-    std::vector<std::pair<DriveType, float>> modifiers = {}
+    std::vector<std::pair<datamodel::npc::DriveType, float>> modifiers = {}
   ) : base_growth_rate(growth_rate),
       intensity_factor(intensity),
       drive_growth_modifiers(std::move(modifiers)) {}
@@ -38,7 +38,7 @@ namespace drive_dynamics_system {
   /**
    * Get drive name for logging
    */
-  inline std::string get_drive_name(const DriveType& drive) {
+  inline std::string get_drive_name(const datamodel::npc::DriveType& drive) {
     return std::visit([](const auto& d) -> std::string { return d.name; }, drive);
   }
 
@@ -46,8 +46,8 @@ namespace drive_dynamics_system {
    * Get the growth modifier for a specific drive type
    */
   inline float getGrowthModifier(
-    const DriveType& drive_type,
-    const std::vector<std::pair<DriveType, float>>& modifiers
+    const datamodel::npc::DriveType& drive_type,
+    const std::vector<std::pair<datamodel::npc::DriveType, float>>& modifiers
   ) {
     // Default modifier if not found
     float modifier = 1.0f;
@@ -66,8 +66,8 @@ namespace drive_dynamics_system {
   /**
    * Update a single drive based on time passing
    */
-  inline Drive updateDrive(
-    const Drive& drive,
+  inline datamodel::npc::Drive updateDrive(
+    const datamodel::npc::Drive& drive,
     const DriveParameters& params,
     uint64_t ticks_elapsed
   ) {
@@ -95,19 +95,19 @@ namespace drive_dynamics_system {
     }
     
     // Return updated drive
-    return Drive(drive.type, new_intensity);
+    return datamodel::npc::Drive(drive.type, new_intensity);
   }
   
   /**
    * Update all drives for an NPC based on time passing
    */
-  inline NPC::ref_type updateDrives(
-    const NPC::ref_type& npc,
+  inline datamodel::npc::NPC::ref_type updateDrives(
+    const datamodel::npc::NPC::ref_type& npc,
     const DriveParameters& params,
     uint64_t ticks_elapsed
   ) {
     // Update each drive
-    std::vector<Drive> updated_drives;
+    std::vector<datamodel::npc::Drive> updated_drives;
     updated_drives.reserve(npc->drives.size());
     
     // Log the update
@@ -120,7 +120,7 @@ namespace drive_dynamics_system {
     }
     
     // Create a new NPC with updated drives
-    NPC updated_npc(
+    datamodel::npc::NPC updated_npc(
       npc->identity,
       updated_drives,
       npc->perception,
@@ -129,11 +129,11 @@ namespace drive_dynamics_system {
       npc->relationships
     );
     
-    return NPC::storage::make_entity(std::move(updated_npc));
+    return datamodel::npc::NPC::storage::make_entity(std::move(updated_npc));
   }
 
 } // namespace drive_dynamics_system
 
-} // namespace history_game
+} // namespace history_game::systems::drives
 
 #endif // HISTORY_GAME_SYSTEMS_DRIVES_DRIVE_DYNAMICS_H

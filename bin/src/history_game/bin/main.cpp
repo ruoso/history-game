@@ -32,88 +32,88 @@ std::string createId(const std::string& prefix) {
 }
 
 // Create a position with random coordinates
-Position createRandomPosition(float x_min, float x_max, float y_min, float y_max) {
+datamodel::world::Position createRandomPosition(float x_min, float x_max, float y_min, float y_max) {
     static std::random_device rd;
     static std::mt19937 gen(rd());
     
     std::uniform_real_distribution<> x_dis(x_min, x_max);
     std::uniform_real_distribution<> y_dis(y_min, y_max);
     
-    return Position(x_dis(gen), y_dis(gen));
+    return datamodel::world::Position(x_dis(gen), y_dis(gen));
 }
 
 // Create an entity with a random position
-Entity::ref_type createEntity(const std::string& id_prefix, float x_min, float x_max, float y_min, float y_max) {
-    Entity entity(createId(id_prefix), createRandomPosition(x_min, x_max, y_min, y_max));
-    return Entity::storage::make_entity(std::move(entity));
+datamodel::entity::Entity::ref_type createEntity(const std::string& id_prefix, float x_min, float x_max, float y_min, float y_max) {
+    datamodel::entity::Entity entity(createId(id_prefix), createRandomPosition(x_min, x_max, y_min, y_max));
+    return datamodel::entity::Entity::storage::make_entity(std::move(entity));
 }
 
 // Create an NPC with basic drives
-NPC::ref_type createNPC(const std::string& id_prefix, float x_min, float x_max, float y_min, float y_max) {
+datamodel::npc::NPC::ref_type createNPC(const std::string& id_prefix, float x_min, float x_max, float y_min, float y_max) {
     // Create the entity
     auto entity = createEntity(id_prefix, x_min, x_max, y_min, y_max);
     
     // Create NPCIdentity
-    NPCIdentity identity(entity);
-    auto identity_ref = NPCIdentity::storage::make_entity(std::move(identity));
+    datamodel::npc::NPCIdentity identity(entity);
+    auto identity_ref = datamodel::npc::NPCIdentity::storage::make_entity(std::move(identity));
     
     // Create initial drives with random intensities
     static std::random_device rd;
     static std::mt19937 gen(rd());
     std::uniform_real_distribution<> intensity_dis(10.0f, 40.0f);
     
-    std::vector<Drive> drives = {
-        Drive(drive::Sustenance{}, intensity_dis(gen)),
-        Drive(drive::Shelter{}, intensity_dis(gen)),
-        Drive(drive::Belonging{}, intensity_dis(gen)),
-        Drive(drive::Curiosity{}, intensity_dis(gen)),
-        Drive(drive::Pride{}, intensity_dis(gen))
+    std::vector<datamodel::npc::Drive> drives = {
+        datamodel::npc::Drive(datamodel::npc::drive::Sustenance{}, intensity_dis(gen)),
+        datamodel::npc::Drive(datamodel::npc::drive::Shelter{}, intensity_dis(gen)),
+        datamodel::npc::Drive(datamodel::npc::drive::Belonging{}, intensity_dis(gen)),
+        datamodel::npc::Drive(datamodel::npc::drive::Curiosity{}, intensity_dis(gen)),
+        datamodel::npc::Drive(datamodel::npc::drive::Pride{}, intensity_dis(gen))
     };
     
     // Create empty perception buffer
-    PerceptionBuffer buffer({});
-    auto perception = PerceptionBuffer::storage::make_entity(std::move(buffer));
+    datamodel::memory::PerceptionBuffer buffer({});
+    auto perception = datamodel::memory::PerceptionBuffer::storage::make_entity(std::move(buffer));
     
     // Create the NPC
-    NPC npc(identity_ref, drives, perception, {}, {}, {});
-    return NPC::storage::make_entity(std::move(npc));
+    datamodel::npc::NPC npc(identity_ref, drives, perception, {}, {}, {});
+    return datamodel::npc::NPC::storage::make_entity(std::move(npc));
 }
 
 // Create a food object
-WorldObject::ref_type createFoodObject(const std::string& id_prefix, 
+datamodel::object::WorldObject::ref_type createFoodObject(const std::string& id_prefix, 
                                       float x_min, float x_max, 
                                       float y_min, float y_max,
-                                      const NPCIdentity::ref_type& creator) {
+                                      const datamodel::npc::NPCIdentity::ref_type& creator) {
     // Create the entity
     auto entity = createEntity(id_prefix, x_min, x_max, y_min, y_max);
     
     // Create the object
-    WorldObject obj(entity, object_category::Food{}, creator);
-    return WorldObject::storage::make_entity(std::move(obj));
+    datamodel::object::WorldObject obj(entity, datamodel::object::object_category::Food{}, creator);
+    return datamodel::object::WorldObject::storage::make_entity(std::move(obj));
 }
 
 // Create a structure object
-WorldObject::ref_type createStructureObject(const std::string& id_prefix, 
+datamodel::object::WorldObject::ref_type createStructureObject(const std::string& id_prefix, 
                                            float x_min, float x_max, 
                                            float y_min, float y_max,
-                                           const NPCIdentity::ref_type& creator) {
+                                           const datamodel::npc::NPCIdentity::ref_type& creator) {
     // Create the entity
     auto entity = createEntity(id_prefix, x_min, x_max, y_min, y_max);
     
     // Create the object
-    WorldObject obj(entity, object_category::Structure{}, creator);
-    return WorldObject::storage::make_entity(std::move(obj));
+    datamodel::object::WorldObject obj(entity, datamodel::object::object_category::Structure{}, creator);
+    return datamodel::object::WorldObject::storage::make_entity(std::move(obj));
 }
 
 int main() {
     // Initialize logging
-    log_init::initialize("debug", "simulation.log");
+    systems::utility::log_initialize("debug", "simulation.log");
     
     // Create an output directory for logs and serialization if it doesn't exist
     std::filesystem::create_directories("output");
     
     // Initialize serialization logger
-    serialization::SimulationLogger sim_logger;
+    systems::utility::SimulationLogger sim_logger;
     bool logger_initialized = sim_logger.initialize("output/simulation_events.json");
     if (!logger_initialized) {
         spdlog::error("Failed to initialize simulation event logger");
@@ -121,20 +121,20 @@ int main() {
     }
     
     // Create a simulation clock
-    SimulationClock clock(0, 1, 100);  // Start at tick 0, generation 1, 100 ticks per generation
-    auto clock_ref = SimulationClock::storage::make_entity(std::move(clock));
+    datamodel::world::SimulationClock clock(0, 1, 100);  // Start at tick 0, generation 1, 100 ticks per generation
+    auto clock_ref = datamodel::world::SimulationClock::storage::make_entity(std::move(clock));
     
     // Create a larger world space
     const float WORLD_SIZE = 1000.0f;
     
     // Create 100 NPCs distributed across the world space
-    std::vector<NPC::ref_type> npcs;
+    std::vector<datamodel::npc::NPC::ref_type> npcs;
     for (int i = 0; i < 100; ++i) {
         npcs.push_back(createNPC("npc", 0.0f, WORLD_SIZE, 0.0f, WORLD_SIZE));
     }
     
     // Create some initial objects
-    std::vector<WorldObject::ref_type> objects;
+    std::vector<datamodel::object::WorldObject::ref_type> objects;
     
     // Random device for object creation
     std::random_device rd;
@@ -156,33 +156,33 @@ int main() {
     }
     
     // Create the initial world state
-    World world(clock_ref, npcs, objects);
-    auto world_ref = World::storage::make_entity(std::move(world));
+    datamodel::world::World world(clock_ref, npcs, objects);
+    auto world_ref = datamodel::world::World::storage::make_entity(std::move(world));
     
     // Ready to start simulation
     spdlog::info("Starting simulation with {} NPCs and {} objects", 
                 npcs.size(), objects.size());
     
     // Prepare entity data for simulation start event
-    std::vector<serialization::json> entity_data;
+    std::vector<systems::utility::json> entity_data;
     
     // Add all NPCs to the entity list
     for (const auto& npc : npcs) {
-        serialization::json npc_json;
+        systems::utility::json npc_json;
         npc_json["id"] = npc->identity->entity->id;
         npc_json["type"] = "NPC";
         
         // Add position data
-        serialization::json position;
+        systems::utility::json position;
         position["x"] = npc->identity->entity->position.x;
         position["y"] = npc->identity->entity->position.y;
         npc_json["position"] = position;
         
         // Add drives data
-        serialization::json drives_json = serialization::json::array();
+        systems::utility::json drives_json = systems::utility::json::array();
         for (const auto& drive : npc->drives) {
-            serialization::json drive_json;
-            drive_json["type"] = drive_dynamics_system::get_drive_name(drive.type);
+            systems::utility::json drive_json;
+            drive_json["type"] = systems::drives::drive_dynamics_system::get_drive_name(drive.type);
             drive_json["value"] = drive.intensity;
             drives_json.push_back(drive_json);
         }
@@ -194,16 +194,16 @@ int main() {
     
     // Add all objects to the entity list
     for (const auto& obj : objects) {
-        serialization::json obj_json;
+        systems::utility::json obj_json;
         obj_json["id"] = obj->entity->id;
         
         // Determine type based on category
         std::string type = "Object";
         std::visit([&](const auto& category) {
             using CategoryType = std::decay_t<decltype(category)>;
-            if constexpr (std::is_same_v<CategoryType, object_category::Food>) {
+            if constexpr (std::is_same_v<CategoryType, datamodel::object::object_category::Food>) {
                 type = "Food";
-            } else if constexpr (std::is_same_v<CategoryType, object_category::Structure>) {
+            } else if constexpr (std::is_same_v<CategoryType, datamodel::object::object_category::Structure>) {
                 type = "Structure";
             }
         }, obj->category);
@@ -211,7 +211,7 @@ int main() {
         obj_json["type"] = type;
         
         // Add position data
-        serialization::json position;
+        systems::utility::json position;
         position["x"] = obj->entity->position.x;
         position["y"] = obj->entity->position.y;
         obj_json["position"] = position;
@@ -223,12 +223,12 @@ int main() {
     // Log simulation start event with world size and entities
     uint64_t current_time = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
-    sim_logger.logEvent(serialization::createSimulationStartEvent(
+    sim_logger.logEvent(systems::utility::createSimulationStartEvent(
         current_time, npcs.size(), objects.size(), WORLD_SIZE, entity_data));
     
     // Create simulation parameters
-    NPCUpdateParams params(
-        DriveParameters(0.2f, 0.5f),  // Drive dynamics
+    systems::simulation::NPCUpdateParams params(
+        systems::drives::DriveParameters(0.2f, 0.5f),  // Drive dynamics
         0.6f,  // Familiarity preference
         0.7f,  // Social preference 
         0.3f,  // Randomness
@@ -239,7 +239,7 @@ int main() {
     
     // Run the simulation for 200 ticks (2 generations)
     // Shorter run for development to avoid long build times
-    World::ref_type final_world = simulation_runner_system::runSimulation(
+    datamodel::world::World::ref_type final_world = systems::simulation::runSimulation(
         world_ref, 
         200,  // 200 ticks for development
         params, 
@@ -250,7 +250,7 @@ int main() {
     // Log simulation end event
     current_time = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
-    sim_logger.logEvent(serialization::createSimulationEndEvent(
+    sim_logger.logEvent(systems::utility::createSimulationEndEvent(
         current_time, 
         final_world->clock->current_tick,
         final_world->clock->current_generation,
@@ -288,7 +288,7 @@ int main() {
     for (const auto& npc : final_world->npcs) {
         // Count actions
         if (npc->identity->current_action) {
-            std::string action_name = action_selection_system::get_action_name(npc->identity->current_action.value());
+            std::string action_name = systems::behavior::action_selection_system::get_action_name(npc->identity->current_action.value());
             action_counts[action_name]++;
         } else {
             no_action_count++;
@@ -300,7 +300,7 @@ int main() {
         
         // Sum drive values
         for (const auto& drive : npc->drives) {
-            std::string drive_name = drive_dynamics_system::get_drive_name(drive.type);
+            std::string drive_name = systems::drives::drive_dynamics_system::get_drive_name(drive.type);
             total_drive_values[drive_name] += drive.intensity;
             drive_counts[drive_name]++;
         }
@@ -350,7 +350,7 @@ int main() {
         
         // Print drive levels
         for (const auto& drive : npc->drives) {
-            std::string drive_name = drive_dynamics_system::get_drive_name(drive.type);
+            std::string drive_name = systems::drives::drive_dynamics_system::get_drive_name(drive.type);
             spdlog::info("  Drive {}: {:.2f}", drive_name, drive.intensity);
         }
         
@@ -360,7 +360,7 @@ int main() {
         
         // Print current action if any
         if (npc->identity->current_action) {
-            std::string action_name = action_selection_system::get_action_name(npc->identity->current_action.value());
+            std::string action_name = systems::behavior::action_selection_system::get_action_name(npc->identity->current_action.value());
             
             if (npc->identity->target_entity) {
                 spdlog::info("  Current action: {} targeting entity {}", 
@@ -382,7 +382,7 @@ int main() {
     }
     
     // Shutdown logging
-    log_init::shutdown();
+    systems::utility::log_shutdown();
     
     return 0;
 }

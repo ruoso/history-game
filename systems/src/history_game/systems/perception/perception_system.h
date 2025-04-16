@@ -18,14 +18,14 @@ namespace history_game::systems::perception {
    * Represents an entity that can be perceived (NPC or WorldObject)
    * using a variant to hold either type
    */
-  using PerceivableEntity = std::variant<NPC::ref_type, WorldObject::ref_type>;
+  using PerceivableEntity = std::variant<datamodel::npc::NPC::ref_type, datamodel::object::WorldObject::ref_type>;
 
   /**
    * Represents a pair of entities and their distance from each other
    */
   struct PerceptionPair {
     // The perceiving NPC
-    const NPC::ref_type perceiver;
+    const datamodel::npc::NPC::ref_type perceiver;
     
     // The entity being perceived (NPC or WorldObject)
     const PerceivableEntity perceived;
@@ -35,7 +35,7 @@ namespace history_game::systems::perception {
     
     // Constructor
     PerceptionPair(
-      const NPC::ref_type& npc,
+      const datamodel::npc::NPC::ref_type& npc,
       const PerceivableEntity& entity,
       float dist
     ) : perceiver(npc),
@@ -47,36 +47,36 @@ namespace history_game::systems::perception {
    * Simple spatial cell for partitioning
    */
   struct SpatialCell {
-    std::vector<NPC::ref_type> npcs;
-    std::vector<WorldObject::ref_type> objects;
+    std::vector<datamodel::npc::NPC::ref_type> npcs;
+    std::vector<datamodel::object::WorldObject::ref_type> objects;
   };
 
   /**
    * Position getter function overloads for argument-dependent lookup
    */
-  inline const Position& getPosition(const NPC::ref_type& npc) {
+  inline const datamodel::world::Position& getPosition(const datamodel::npc::NPC::ref_type& npc) {
     return npc->identity->entity->position;
   }
 
-  inline const Position& getPosition(const WorldObject::ref_type& obj) {
+  inline const datamodel::world::Position& getPosition(const datamodel::object::WorldObject::ref_type& obj) {
     return obj->entity->position;
   }
 
   /**
    * ID getter function overloads for argument-dependent lookup
    */
-  inline const std::string& getId(const NPC::ref_type& npc) {
+  inline const std::string& getId(const datamodel::npc::NPC::ref_type& npc) {
     return npc->identity->entity->id;
   }
 
-  inline const std::string& getId(const WorldObject::ref_type& obj) {
+  inline const std::string& getId(const datamodel::object::WorldObject::ref_type& obj) {
     return obj->entity->id;
   }
 
   /**
    * Calculate distance between two positions
    */
-  inline float calculateDistance(const Position& pos1, const Position& pos2) {
+  inline float calculateDistance(const datamodel::world::Position& pos1, const datamodel::world::Position& pos2) {
     float dx = pos1.x - pos2.x;
     float dy = pos1.y - pos2.y;
     return std::sqrt(dx*dx + dy*dy);
@@ -85,8 +85,8 @@ namespace history_game::systems::perception {
   /**
    * Get position of any perceivable entity using std::visit with a lambda
    */
-  inline const Position& getEntityPosition(const PerceivableEntity& entity) {
-    return std::visit([](const auto& e) -> const Position& { return getPosition(e); }, entity);
+  inline const datamodel::world::Position& getEntityPosition(const PerceivableEntity& entity) {
+    return std::visit([](const auto& e) -> const datamodel::world::Position& { return getPosition(e); }, entity);
   }
   
   /**
@@ -99,14 +99,14 @@ namespace history_game::systems::perception {
   /**
    * Get entity type name for NPC
    */
-  inline std::string get_entity_type_name(const NPC::ref_type& npc) {
+  inline std::string get_entity_type_name(const datamodel::npc::NPC::ref_type& npc) {
     return "NPC";
   }
   
   /**
    * Get entity type name for WorldObject
    */
-  inline std::string get_entity_type_name(const WorldObject::ref_type& obj) {
+  inline std::string get_entity_type_name(const datamodel::object::WorldObject::ref_type& obj) {
     return std::visit([](const auto& category) -> std::string { 
       return category.name; 
     }, obj->category);
@@ -124,14 +124,14 @@ namespace history_game::systems::perception {
   /**
    * Get entity ID for logging
    */
-  inline std::string get_entity_id(const NPC::ref_type& npc) {
+  inline std::string get_entity_id(const datamodel::npc::NPC::ref_type& npc) {
     return npc->identity->entity->id;
   }
   
   /**
    * Get entity ID for WorldObject
    */
-  inline std::string get_entity_id(const WorldObject::ref_type& obj) {
+  inline std::string get_entity_id(const datamodel::object::WorldObject::ref_type& obj) {
     return obj->entity->id;
   }
   
@@ -147,7 +147,7 @@ namespace history_game::systems::perception {
   /**
    * Calculate cell index for a position
    */
-  inline std::pair<int, int> getCellIndices(const Position& pos, float cell_size) {
+  inline std::pair<int, int> getCellIndices(const datamodel::world::Position& pos, float cell_size) {
     int x_idx = static_cast<int>(pos.x / cell_size);
     int y_idx = static_cast<int>(pos.y / cell_size);
     return {x_idx, y_idx};
@@ -170,7 +170,7 @@ namespace history_game::systems::perception {
    * @return Vector of all perceptible entity pairs with their distances
    */
   inline std::vector<PerceptionPair> calculatePerceptibleEntities(
-    const World::ref_type& world,
+    const datamodel::world::World::ref_type& world,
     float max_distance = 10.0f
   ) {
     std::vector<PerceptionPair> result;
@@ -183,21 +183,21 @@ namespace history_game::systems::perception {
     
     // Populate the grid with NPCs
     for (const auto& npc : world->npcs) {
-      const Position& pos = getPosition(npc);
+      const datamodel::world::Position& pos = getPosition(npc);
       auto [x_idx, y_idx] = getCellIndices(pos, cell_size);
       grid[getCellKey(x_idx, y_idx)].npcs.push_back(npc);
     }
     
     // Populate the grid with objects
     for (const auto& obj : world->objects) {
-      const Position& pos = getPosition(obj);
+      const datamodel::world::Position& pos = getPosition(obj);
       auto [x_idx, y_idx] = getCellIndices(pos, cell_size);
       grid[getCellKey(x_idx, y_idx)].objects.push_back(obj);
     }
     
     // For each NPC, check nearby cells for perceptible entities
     for (const auto& npc : world->npcs) {
-      const Position& npc_pos = getPosition(npc);
+      const datamodel::world::Position& npc_pos = getPosition(npc);
       auto [center_x, center_y] = getCellIndices(npc_pos, cell_size);
       
       // Check cells in the 3x3 grid centered on the NPC's cell
@@ -221,7 +221,7 @@ namespace history_game::systems::perception {
               continue;
             }
             
-            const Position& other_pos = getPosition(other_npc);
+            const datamodel::world::Position& other_pos = getPosition(other_npc);
             float distance = calculateDistance(npc_pos, other_pos);
             
             if (distance <= max_distance) {
@@ -237,7 +237,7 @@ namespace history_game::systems::perception {
           
           // Check objects in this cell
           for (const auto& object : cell.objects) {
-            const Position& obj_pos = getPosition(object);
+            const datamodel::world::Position& obj_pos = getPosition(object);
             float distance = calculateDistance(npc_pos, obj_pos);
             
             if (distance <= max_distance) {
@@ -258,6 +258,6 @@ namespace history_game::systems::perception {
     return result;
   }
 
-} // namespace perception_system
+} // namespace history_game::systems::perception
 
 #endif // HISTORY_GAME_SYSTEMS_PERCEPTION_PERCEPTION_SYSTEM_H

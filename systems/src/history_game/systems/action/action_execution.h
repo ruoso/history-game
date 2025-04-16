@@ -10,7 +10,7 @@
 #include <history_game/systems/behavior/action_selection.h>
 #include <history_game/systems/utility/serialization.h>
 
-namespace history_game::systems::actions {
+namespace history_game::systems::action {
 
 /**
  * Visitor for executing different action types
@@ -308,6 +308,6 @@ inline datamodel::world::World::ref_type executeAllActions(
     return datamodel::world::World::storage::make_entity(std::move(updated_world));
 }
 
-} // namespace history_game::systems::actions
+} // namespace history_game::systems::action
 
 #endif // HISTORY_GAME_SYSTEMS_ACTION_ACTION_EXECUTION_H

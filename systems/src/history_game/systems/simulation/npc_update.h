@@ -16,7 +16,7 @@ namespace history_game::systems::simulation {
  */
 struct NPCUpdateParams {
   // Drive dynamics parameters
-  const DriveParameters drive_params;
+  const drives::DriveParameters drive_params;
   
   // Action selection parameters
   const float familiarity_preference;
@@ -30,7 +30,7 @@ struct NPCUpdateParams {
   
   // Constructor with default values
   NPCUpdateParams(
-    DriveParameters drives = {},
+    drives::DriveParameters drives = {},
     float f_pref = 0.5f,
     float s_pref = 0.5f,
     float rand = 0.2f,
@@ -51,23 +51,23 @@ namespace npc_update_system {
   /**
    * Update a single NPC for one simulation tick
    */
-  inline NPC::ref_type updateNPC(
-    const NPC::ref_type& npc,
-    const World::ref_type& world,
+  inline datamodel::npc::NPC::ref_type updateNPC(
+    const datamodel::npc::NPC::ref_type& npc,
+    const datamodel::world::World::ref_type& world,
     const NPCUpdateParams& params,
     uint64_t current_time
   ) {
     const std::string& npc_id = npc->identity->entity->id;
     
     // 1. Update drives based on natural increase
-    auto npc_with_drives = drive_dynamics_system::updateDrives(
+    auto npc_with_drives = drives::drive_dynamics_system::updateDrives(
       npc,
       params.drive_params,
       1  // One tick has elapsed
     );
     
     // 2. Process perception to form episodic memories
-    auto npc_with_memories = episode_formation_system::formEpisodicMemories(
+    auto npc_with_memories = memory::formEpisodicMemories(
       npc_with_drives,
       current_time,
       params.significance_threshold,
@@ -76,14 +76,14 @@ namespace npc_update_system {
     );
     
     // 3. Select the next action based on drives and context
-    ActionSelectionCriteria criteria(
+    behavior::ActionSelectionCriteria criteria(
       npc_with_memories->drives,
       params.familiarity_preference,
       params.social_preference,
       params.randomness
     );
     
-    auto npc_with_action = action_selection_system::selectNextAction(
+    auto npc_with_action = behavior::action_selection_system::selectNextAction(
       npc_with_memories,
       world,
       criteria
@@ -95,8 +95,8 @@ namespace npc_update_system {
   /**
    * Update all NPCs in the world for one simulation tick
    */
-  inline World::ref_type updateAllNPCs(
-    const World::ref_type& world,
+  inline datamodel::world::World::ref_type updateAllNPCs(
+    const datamodel::world::World::ref_type& world,
     const NPCUpdateParams& params
   ) {
     // Get the current time from the simulation clock
@@ -106,7 +106,7 @@ namespace npc_update_system {
                 world->npcs.size(), current_time);
     
     // Update each NPC
-    std::vector<NPC::ref_type> updated_npcs;
+    std::vector<datamodel::npc::NPC::ref_type> updated_npcs;
     updated_npcs.reserve(world->npcs.size());
     
     for (const auto& npc : world->npcs) {
@@ -116,7 +116,7 @@ namespace npc_update_system {
     }
     
     // Create a new world with updated NPCs
-    World updated_world(
+    datamodel::world::World updated_world(
       world->clock,
       std::move(updated_npcs),
       world->objects
@@ -124,11 +124,11 @@ namespace npc_update_system {
     
     spdlog::info("Completed updating all NPCs at tick {}", current_time);
     
-    return World::storage::make_entity(std::move(updated_world));
+    return datamodel::world::World::storage::make_entity(std::move(updated_world));
   }
 
 } // namespace npc_update_system
 
-} // namespace history_game
+} // namespace history_game::systems::simulation
 
 #endif // HISTORY_GAME_SYSTEMS_SIMULATION_NPC_UPDATE_H

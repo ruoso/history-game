@@ -225,5 +225,4 @@ std::string SimulationLogger::getOutputPath() const {
     return output_path;
 }
 
-} // namespace serialization
-} // namespace history_game
+} // namespace history_game::systems::utility
