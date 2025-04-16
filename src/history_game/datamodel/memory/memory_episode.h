@@ -5,8 +5,8 @@
 #include <vector>
 #include <string>
 #include <cpioo/managed_entity.hpp>
-#include "datamodel/action/action_sequence.h"
-#include "datamodel/npc/drive.h"
+#include <history_game/datamodel/action/action_sequence.h>
+#include <history_game/datamodel/npc/drive.h>
 
 namespace history_game {
 

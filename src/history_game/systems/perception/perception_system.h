@@ -8,9 +8,9 @@
 #include <unordered_map>
 #include <algorithm>
 #include <spdlog/spdlog.h>
-#include "datamodel/world/world.h"
-#include "datamodel/npc/npc.h"
-#include "datamodel/object/object.h"
+#include <history_game/datamodel/world/world.h>
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/object/object.h>
 
 namespace history_game {
 

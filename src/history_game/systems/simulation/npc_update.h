@@ -3,11 +3,11 @@
 
 #include <vector>
 #include <spdlog/spdlog.h>
-#include "datamodel/world/world.h"
-#include "datamodel/npc/npc.h"
-#include "systems/drives/drive_dynamics.h"
-#include "systems/behavior/action_selection.h"
-#include "systems/memory/episode_formation.h"
+#include <history_game/datamodel/world/world.h>
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/systems/drives/drive_dynamics.h>
+#include <history_game/systems/behavior/action_selection.h>
+#include <history_game/systems/memory/episode_formation.h>
 
 namespace history_game {
 

@@ -7,13 +7,13 @@
 #include <random>
 #include <cpioo/managed_entity.hpp>
 #include <spdlog/spdlog.h>
-#include "datamodel/npc/npc.h"
-#include "datamodel/npc/drive.h"
-#include "datamodel/action/action_type.h"
-#include "datamodel/memory/memory_episode.h"
-#include "datamodel/world/world.h"
-#include "systems/drives/drive_impact.h"
-#include "datamodel/object/object.h"
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/npc/drive.h>
+#include <history_game/datamodel/action/action_type.h>
+#include <history_game/datamodel/memory/memory_episode.h>
+#include <history_game/datamodel/world/world.h>
+#include <history_game/systems/drives/drive_impact.h>
+#include <history_game/datamodel/object/object.h>
 
 namespace history_game {
 

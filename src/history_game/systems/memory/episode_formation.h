@@ -5,12 +5,12 @@
 #include <algorithm>
 #include <cpioo/managed_entity.hpp>
 #include <spdlog/spdlog.h>
-#include "datamodel/npc/npc.h"
-#include "datamodel/memory/memory_entry.h"
-#include "datamodel/memory/memory_episode.h"
-#include "datamodel/memory/perception_buffer.h"
-#include "datamodel/action/action_sequence.h"
-#include "systems/drives/drive_impact.h"
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/memory/memory_entry.h>
+#include <history_game/datamodel/memory/memory_episode.h>
+#include <history_game/datamodel/memory/perception_buffer.h>
+#include <history_game/datamodel/action/action_sequence.h>
+#include <history_game/systems/drives/drive_impact.h>
 
 namespace history_game {
 

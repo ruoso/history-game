@@ -6,12 +6,12 @@
 #include <functional>
 #include <unordered_map>
 #include <spdlog/spdlog.h>
-#include "datamodel/world/world.h"
-#include "datamodel/npc/npc.h"
-#include "datamodel/memory/memory_entry.h"
-#include "datamodel/memory/perception_buffer.h"
-#include "systems/perception/perception_system.h"
-#include "datamodel/action/action_type.h"
+#include <history_game/datamodel/world/world.h>
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/memory/memory_entry.h>
+#include <history_game/datamodel/memory/perception_buffer.h>
+#include <history_game/systems/perception/perception_system.h>
+#include <history_game/datamodel/action/action_type.h>
 
 namespace history_game {
 

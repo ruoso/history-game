@@ -6,13 +6,13 @@
 #include <string>
 #include <variant>
 #include <cpioo/managed_entity.hpp>
-#include "datamodel/npc/drive.h"
-#include "datamodel/npc/npc.h"
-#include "datamodel/action/action_type.h"
-#include "datamodel/memory/memory_entry.h"
-#include "datamodel/relationship/relationship.h"
-#include "datamodel/relationship/relationship_target.h"
-#include "datamodel/drives/action_context.h"
+#include <history_game/datamodel/npc/drive.h>
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/action/action_type.h>
+#include <history_game/datamodel/memory/memory_entry.h>
+#include <history_game/datamodel/relationship/relationship.h>
+#include <history_game/datamodel/relationship/relationship_target.h>
+#include <history_game/datamodel/drives/action_context.h>
 
 namespace history_game {
 

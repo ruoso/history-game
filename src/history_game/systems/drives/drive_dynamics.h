@@ -4,9 +4,9 @@
 #include <vector>
 #include <cmath>
 #include <spdlog/spdlog.h>
-#include "datamodel/npc/npc.h"
-#include "datamodel/npc/drive.h"
-#include "systems/drives/drive_impact.h"
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/npc/drive.h>
+#include <history_game/systems/drives/drive_impact.h>
 
 namespace history_game {
 

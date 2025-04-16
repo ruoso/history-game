@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include <cpioo/managed_entity.hpp>
-#include "datamodel/memory/memory_entry.h"
+#include <history_game/datamodel/memory/memory_entry.h>
 
 namespace history_game {
 

@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <vector>
 #include <cpioo/managed_entity.hpp>
-#include "datamodel/entity/entity.h"
-#include "datamodel/npc/drive.h"
-#include "datamodel/relationship/relationship_target.h"
+#include <history_game/datamodel/entity/entity.h>
+#include <history_game/datamodel/npc/drive.h>
+#include <history_game/datamodel/relationship/relationship_target.h>
 
 namespace history_game {
 

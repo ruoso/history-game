@@ -9,16 +9,16 @@
 #include <spdlog/spdlog.h>
 #include <chrono>
 
-#include "datamodel/entity/entity.h"
-#include "datamodel/world/world.h"
-#include "datamodel/world/simulation_clock.h"
-#include "datamodel/npc/npc.h"
-#include "datamodel/npc/drive.h"
-#include "datamodel/object/object.h"
-#include "systems/utility/log_init.h"
-#include "systems/utility/serialization.h"
-#include "systems/simulation/simulation_runner.h"
-#include "datamodel/memory/perception_buffer.h"
+#include <history_game/datamodel/entity/entity.h>
+#include <history_game/datamodel/world/world.h>
+#include <history_game/datamodel/world/simulation_clock.h>
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/npc/drive.h>
+#include <history_game/datamodel/object/object.h>
+#include <history_game/systems/utility/log_init.h>
+#include <history_game/systems/utility/serialization.h>
+#include <history_game/systems/simulation/simulation_runner.h>
+#include <history_game/datamodel/memory/perception_buffer.h>
 
 using namespace history_game;
 

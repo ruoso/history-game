@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
-#include "systems/utility/serialization.h"
+#include <history_game/systems/utility/serialization.h>
 
 using namespace history_game;
 using json = nlohmann::json;

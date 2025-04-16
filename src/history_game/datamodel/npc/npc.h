@@ -4,14 +4,14 @@
 #include <vector>
 #include <string>
 #include <cpioo/managed_entity.hpp>
-#include "datamodel/entity/entity.h"
-#include "datamodel/npc/drive.h"
-#include "datamodel/npc/npc_identity.h"
-#include "datamodel/memory/perception_buffer.h"
-#include "datamodel/memory/memory_episode.h"
-#include "datamodel/memory/witnessed_sequence.h"
-#include "datamodel/relationship/relationship.h"
-#include "datamodel/relationship/relationship_target.h"
+#include <history_game/datamodel/entity/entity.h>
+#include <history_game/datamodel/npc/drive.h>
+#include <history_game/datamodel/npc/npc_identity.h>
+#include <history_game/datamodel/memory/perception_buffer.h>
+#include <history_game/datamodel/memory/memory_episode.h>
+#include <history_game/datamodel/memory/witnessed_sequence.h>
+#include <history_game/datamodel/relationship/relationship.h>
+#include <history_game/datamodel/relationship/relationship_target.h>
 
 namespace history_game {
 

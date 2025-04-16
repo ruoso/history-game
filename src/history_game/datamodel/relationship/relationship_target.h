@@ -2,8 +2,8 @@
 #define HISTORY_GAME_RELATIONSHIP_TARGET_H
 
 #include <variant>
-#include "datamodel/entity/entity.h"
-#include "datamodel/object/object.h"
+#include <history_game/datamodel/entity/entity.h>
+#include <history_game/datamodel/object/object.h>
 
 namespace history_game {
 

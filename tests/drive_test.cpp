@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
-#include "datamodel/npc/drive.h"
-#include "datamodel/npc/npc.h"
-#include "systems/drives/drive_dynamics.h"
-#include "systems/drives/drive_impact.h"
-#include "datamodel/memory/memory_entry.h"
-#include "datamodel/action/action_type.h"
+#include <history_game/datamodel/npc/drive.h>
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/systems/drives/drive_dynamics.h>
+#include <history_game/systems/drives/drive_impact.h>
+#include <history_game/datamodel/memory/memory_entry.h>
+#include <history_game/datamodel/action/action_type.h>
 
 using namespace history_game;
 

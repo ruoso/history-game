@@ -3,12 +3,12 @@
 
 #include <random>
 #include <spdlog/spdlog.h>
-#include "datamodel/world/world.h"
-#include "datamodel/action/action_type.h"
-#include "datamodel/npc/npc.h"
-#include "datamodel/object/object.h"
-#include "systems/behavior/action_selection.h"
-#include "systems/utility/serialization.h"
+#include <history_game/datamodel/world/world.h>
+#include <history_game/datamodel/action/action_type.h>
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/object/object.h>
+#include <history_game/systems/behavior/action_selection.h>
+#include <history_game/systems/utility/serialization.h>
 
 namespace history_game {
 namespace action_execution_system {

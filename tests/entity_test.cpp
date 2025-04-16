@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "datamodel/entity/entity.h"
-#include "datamodel/world/position.h"
-#include "datamodel/npc/npc.h"
-#include "datamodel/npc/drive.h"
-#include "datamodel/memory/perception_buffer.h"
+#include <history_game/datamodel/entity/entity.h>
+#include <history_game/datamodel/world/position.h>
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/npc/drive.h>
+#include <history_game/datamodel/memory/perception_buffer.h>
 
 using namespace history_game;
 

@@ -5,11 +5,11 @@
 #include <unordered_map>
 #include <string>
 #include <cpioo/managed_entity.hpp>
-#include "datamodel/entity/entity.h"
-#include "datamodel/npc/npc.h"
-#include "datamodel/npc/npc_identity.h"
-#include "datamodel/object/object.h"
-#include "datamodel/world/simulation_clock.h"
+#include <history_game/datamodel/entity/entity.h>
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/npc/npc_identity.h>
+#include <history_game/datamodel/object/object.h>
+#include <history_game/datamodel/world/simulation_clock.h>
 
 namespace history_game {
 

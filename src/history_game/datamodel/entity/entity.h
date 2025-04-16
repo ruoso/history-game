@@ -3,7 +3,7 @@
 
 #include <string>
 #include <cpioo/managed_entity.hpp>
-#include "datamodel/world/position.h"
+#include <history_game/datamodel/world/position.h>
 
 namespace history_game {
 

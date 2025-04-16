@@ -6,8 +6,8 @@
 #include <variant>
 #include <concepts>
 #include <cpioo/managed_entity.hpp>
-#include "datamodel/entity/entity.h"
-#include "datamodel/npc/npc_identity.h"
+#include <history_game/datamodel/entity/entity.h>
+#include <history_game/datamodel/npc/npc_identity.h>
 
 namespace history_game {
 

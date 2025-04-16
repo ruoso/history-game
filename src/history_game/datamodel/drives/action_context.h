@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <string>
-#include "datamodel/npc/npc.h"
-#include "datamodel/memory/memory_entry.h"
+#include <history_game/datamodel/npc/npc.h>
+#include <history_game/datamodel/memory/memory_entry.h>
 
 namespace history_game {
 

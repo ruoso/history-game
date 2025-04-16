@@ -5,10 +5,10 @@
 #include <cstdint>
 #include <optional>
 #include <cpioo/managed_entity.hpp>
-#include "datamodel/entity/entity.h"
-#include "datamodel/npc/npc_identity.h"
-#include "datamodel/action/action_type.h"
-#include "datamodel/object/object.h"
+#include <history_game/datamodel/entity/entity.h>
+#include <history_game/datamodel/npc/npc_identity.h>
+#include <history_game/datamodel/action/action_type.h>
+#include <history_game/datamodel/object/object.h>
 
 namespace history_game {
 

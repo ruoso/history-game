@@ -4,12 +4,12 @@
 #include <functional>
 #include <spdlog/spdlog.h>
 #include <chrono>
-#include "datamodel/world/world.h"
-#include "systems/simulation/npc_update.h"
-#include "systems/memory/memory_system.h"
-#include "datamodel/world/simulation_clock.h"
-#include "systems/utility/serialization.h"
-#include "systems/action/action_execution.h"
+#include <history_game/datamodel/world/world.h>
+#include <history_game/systems/simulation/npc_update.h>
+#include <history_game/systems/memory/memory_system.h>
+#include <history_game/datamodel/world/simulation_clock.h>
+#include <history_game/systems/utility/serialization.h>
+#include <history_game/systems/action/action_execution.h>
 
 namespace history_game {
 
