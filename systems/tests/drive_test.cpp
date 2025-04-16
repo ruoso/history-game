@@ -103,10 +103,10 @@ TEST(DriveImpactTest, ObserveImpact) {
     auto memory_ref = memory::MemoryEntry::storage::make_entity(std::move(entry));
     
     // Create action context
-    drives::ActionContext context(npc_ref, memory_ref, 100);
+    history_game::datamodel::drives::ActionContext context(npc_ref, memory_ref, 100);
     
     // Get impacts
-    std::vector<npc::Drive> impacts = drives::drive_impact_system::evaluateImpact(context);
+    std::vector<npc::Drive> impacts = history_game::systems::drives::drive_impact_system::evaluateImpact(context);
     
     // Check impacts - Observe should reduce curiosity
     EXPECT_FALSE(impacts.empty());
